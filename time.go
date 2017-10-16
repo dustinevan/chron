@@ -56,5 +56,19 @@ func (t TimeExact) Decrement(l Length) TimeExact {
 }
 
 func ZeroValue() TimeExact {
-	return TimeExact{time.Time{}}
+	return NewYear(0).AsTimeExact()
+}
+
+// see: https://stackoverflow.com/questions/25065055/what-is-the-maximum-time-time-in-go
+// and time.Unix() implementation
+var unixToInternal = int64((1969*365 + 1969/4 - 1969/100 + 1969/400) * 24 * 60 * 60)
+var max = time.Unix(1<<63-1-unixToInternal, 999999999).UTC()
+var min = time.Unix( -1*int64(^uint(0) >> 1)-1+unixToInternal, 0).UTC()
+
+func MaxValue() TimeExact {
+	return TimeOf(max)
+}
+
+func MinValue() TimeExact {
+	return TimeOf(min)
 }
