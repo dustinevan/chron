@@ -34,7 +34,7 @@ func (d Day) Increment(l Length) ExactTime {
 }
 
 func (d Day) Decrement(l Length) ExactTime {
-	return ExactTime{d.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(l.Duration())}
+	return ExactTime{d.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (d Day) AddN(n int) Day {
@@ -51,7 +51,7 @@ func (d Day) Before() ExactTime {
 }
 
 func (d Day) After() ExactTime {
-	return d.AsExactTime().Increment(length.Nano)
+	return d.AsExactTime().Increment(length.Day)
 }
 
 func (d Day) Len() Length {

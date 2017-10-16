@@ -36,7 +36,7 @@ func (s *Timespan) Before() Time {
 }
 
 func (s *Timespan) After() Time {
-	return s.t2.Increment(length.Nano)
+	return s.t2.Increment(s.len)
 }
 
 func (s *Timespan) Len() Length {

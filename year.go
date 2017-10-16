@@ -51,7 +51,7 @@ func (y Year) Before() ExactTime {
 }
 
 func (y Year) After() ExactTime {
-	return y.AsExactTime().Increment(length.Nano)
+	return y.AsExactTime().Increment(length.Year)
 }
 
 func (y Year) Len() Length {

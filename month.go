@@ -34,7 +34,7 @@ func (m Month) Increment(l Length) ExactTime {
 }
 
 func (m Month) Decrement(l Length) ExactTime {
-	return ExactTime{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(l.Duration())}
+	return ExactTime{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (m Month) AddN(n int) Month {
@@ -51,7 +51,7 @@ func (m Month) Before() ExactTime {
 }
 
 func (m Month) After() ExactTime {
-	return m.AsExactTime().Increment(length.Nano)
+	return m.AsExactTime().Increment(length.Month)
 }
 
 func (m Month) Len() Length {

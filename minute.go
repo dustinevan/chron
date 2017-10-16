@@ -34,7 +34,7 @@ func (m Minute) Increment(l Length) ExactTime {
 }
 
 func (m Minute) Decrement(l Length) ExactTime {
-	return ExactTime{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(l.Duration())}
+	return ExactTime{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (m Minute) AddN(n int) Minute {
@@ -51,7 +51,7 @@ func (m Minute) Before() ExactTime {
 }
 
 func (m Minute) After() ExactTime {
-	return m.AsExactTime().Increment(length.Nano)
+	return m.AsExactTime().Increment(length.Minute)
 }
 
 func (m Minute) Len() Length {
