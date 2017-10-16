@@ -26,15 +26,15 @@ func (d Day) AsMinute() Minute       { return MinuteOf(d.Time) }
 func (d Day) AsSecond() Second       { return SecondOf(d.Time) }
 func (d Day) AsMilli() Milli         { return MilliOf(d.Time) }
 func (d Day) AsMicro() Micro         { return MicroOf(d.Time) }
-func (d Day) AsExactTime() ExactTime { return TimeOf(d.Time) }
+func (d Day) AsTimeExact() TimeExact { return TimeOf(d.Time) }
 func (d Day) AsTime() time.Time      { return d.Time }
 
-func (d Day) Increment(l Length) ExactTime {
-	return ExactTime{d.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
+func (d Day) Increment(l Length) TimeExact {
+	return TimeExact{d.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (d Day) Decrement(l Length) ExactTime {
-	return ExactTime{d.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
+func (d Day) Decrement(l Length) TimeExact {
+	return TimeExact{d.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (d Day) AddN(n int) Day {
@@ -42,15 +42,15 @@ func (d Day) AddN(n int) Day {
 }
 
 // Period Implementation
-func (d Day) Contains(t ExactTime) bool {
+func (d Day) Contains(t TimeExact) bool {
 	return t.Day() == d.Day()
 }
 
-func (d Day) Before() ExactTime {
+func (d Day) Before() TimeExact {
 	return d.AsExactTime().Decrement(length.Nano)
 }
 
-func (d Day) After() ExactTime {
+func (d Day) After() TimeExact {
 	return d.AsExactTime().Increment(length.Day)
 }
 
