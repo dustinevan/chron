@@ -25,7 +25,7 @@ type TimeExact struct {
 }
 
 func Now() TimeExact {
-	return TimeOf(time.Now())
+	return TimeOf(time.Now().In(time.UTC))
 }
 
 func NewTime(year int, month time.Month, day, hour, min, sec, nano int) TimeExact {
