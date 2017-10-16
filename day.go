@@ -47,11 +47,11 @@ func (d Day) Contains(t TimeExact) bool {
 }
 
 func (d Day) Before() TimeExact {
-	return d.AsExactTime().Decrement(length.Nano)
+	return d.AsTimeExact().Decrement(length.Nano)
 }
 
 func (d Day) After() TimeExact {
-	return d.AsExactTime().Increment(length.Day)
+	return d.AsTimeExact().Increment(length.Day)
 }
 
 func (d Day) Len() Length {

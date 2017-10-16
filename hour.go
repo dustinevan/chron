@@ -47,11 +47,11 @@ func (h Hour) Contains(t TimeExact) bool {
 }
 
 func (h Hour) Before() TimeExact {
-	return h.AsExactTime().Decrement(length.Nano)
+	return h.AsTimeExact().Decrement(length.Nano)
 }
 
 func (h Hour) After() TimeExact {
-	return h.AsExactTime().Increment(length.Hour)
+	return h.AsTimeExact().Increment(length.Hour)
 }
 
 func (h Hour) Len() Length {

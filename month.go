@@ -47,11 +47,11 @@ func (m Month) Contains(t TimeExact) bool {
 }
 
 func (m Month) Before() TimeExact {
-	return m.AsExactTime().Decrement(length.Nano)
+	return m.AsTimeExact().Decrement(length.Nano)
 }
 
 func (m Month) After() TimeExact {
-	return m.AsExactTime().Increment(length.Month)
+	return m.AsTimeExact().Increment(length.Month)
 }
 
 func (m Month) Len() Length {

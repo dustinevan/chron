@@ -47,11 +47,11 @@ func (m Milli) Contains(t TimeExact) bool {
 }
 
 func (m Milli) Before() TimeExact {
-	return m.AsExactTime().Decrement(length.Nano)
+	return m.AsTimeExact().Decrement(length.Nano)
 }
 
 func (m Milli) After() TimeExact {
-	return m.AsExactTime().Increment(length.Milli)
+	return m.AsTimeExact().Increment(length.Milli)
 }
 
 func (m Milli) Len() Length {

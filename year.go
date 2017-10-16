@@ -47,11 +47,11 @@ func (y Year) Contains(t TimeExact) bool {
 }
 
 func (y Year) Before() TimeExact {
-	return y.AsExactTime().Decrement(length.Nano)
+	return y.AsTimeExact().Decrement(length.Nano)
 }
 
 func (y Year) After() TimeExact {
-	return y.AsExactTime().Increment(length.Year)
+	return y.AsTimeExact().Increment(length.Year)
 }
 
 func (y Year) Len() Length {
