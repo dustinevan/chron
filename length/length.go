@@ -1,8 +1,8 @@
 package length
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 // Implementations of the chron.Length interface
@@ -86,6 +86,12 @@ var durations = []Duration{
 	Duration{Dur: 1000},
 	Duration{Dur: 1},
 }
+
+/*var converters = []func(chron.Time) chron.Time{
+	func(c chron.Time) chron.Time {
+
+	}
+}*/
 
 func (u Unit) Years() int {
 	return durations[int(u)].Year
