@@ -3,7 +3,7 @@ package chron
 import (
 	"time"
 
-	"github.com/dustinevan/time/chron/length"
+	"github.com/dustinevan/chron/length"
 )
 
 type Day struct {
