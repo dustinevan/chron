@@ -4,70 +4,57 @@ import (
 	"context"
 
 	"time"
-
-	"github.com/dustinevan/time/chron"
-	"github.com/dustinevan/time/date"
+	"github.com/dustinevan/chron"
+	"github.com/dustinevan/chron/length"
 )
-
-type DynamicIncrementFunc func() chron.Length
-type DynamicOffsetFunc func(from chron.Time) chron.Time
 
 type sequence struct {
 
 	// -- Boundary and Flow --
-	// the start time. if it is more precise than the
-	// output time unit, the first output will be the next
-	// occurrence after begin
-	begin chron.Time
 
-	// exclusive. If not set this defaults to date.MaxValue() or date.MinValue()
-	// depending on inverseTime
-	end chron.Time
+	// Inclusive--this is the first time in the sequence. If begin does not
+	// match the precision of the output time, the first output will be the
+	// next occurrence of that time precision. e.g. a positive time flow
+	// MinuteChan() seq, with begin := 2017-10-16 16:40:04.049121656 will
+	// begin at 2017-10-16 16:41:00.0, neg time flow would begin at 16:40
+	begin chron.TimeExact
+
+	// Exclusive--the timeExact of end is not included in the sequence.
+	// If not set this defaults to date.MaxValue() or date.MinValue()
+	// depending on inverseTime. A
+	end chron.TimeExact
 
 	// true = the sequence goes back in time
-	inverseTime bool
+	negativeTime bool
 
 	// -- Increment Fields -- Note: Panics if one of these is not set.
-	// incUnit is the simple case, it increments by a single time unit
-	incLength chron.Length
-	incN      int
 
-	// incDynamic takes precedence over incUnit; The sequence is
-	// incremented by the returned Interval
-	incDynamic DynamicIncrementFunc
+	// constantIncrement is the length added to get the next seq time.
+	increment chron.Length
+	incn int
+	repeats       int
+
+	// variableIncrementFn takes precedence over constantIncrement; The
+	// sequence is incremented by the returned Length
+	incrementFn func(chron.Time) chron.Length
 
 	// -- Offset Fields --
-	// this interval is added to the outputted date before it is sent.
-	// the sequence does not base the next date off this value e.g.
-	// the current date does not include offset
+
+	// if set, this length is added to the next seq time. Offset is not
+	// used to calculate the next seq time. e.g. seq bases the next
+	// date off curr not curr + offset.
 	offset chron.Length
-	// offsetDynamic takes precedence over offset. A good example use
-	// case is random offsets the spread the sequence times across an
+	offn int
+	// variableOffset takes precedence over constantOffset. A good example
+	// use case is random offsets the spread the sequence times across an
 	// hour.
-	offsetDynamic DynamicOffsetFunc
-
-	// -- Cancellation
-	// the parent context, when cancelled the sequencing goroutine will
-	// close its channel and return
-	ctx context.Context
-
-	// if ctx is not nil, this is a child of ctx, cancels to ctx will also
-	// cancel internalCtx. If ctx is nil, this is a child of the background
-	// context. calls to Stop will cancel this context, the sequencing
-	// goroutine will close it's channel and return
-	internalCtx context.Context
-	// cancel func used by Stop, clients are expected to keep reading
-	// the outgoing channel is closed
-	internalCanc context.CancelFunc
+	offsetFn func(chron.Time) chron.Length
 
 	// -- Channel Buffering --
-	// defaults to 8; set to 0 for unbuffered channels
+	// Defaults to 8; set to 0 for unbuffered channels
 	bsize int
 
-	// making this available to the struct. I'm doing so for Halt(), not sure if I should
-	outgoing <-chan chron.Time
-
-	// -- Waiting --
+	// -- Synchronization --
 	// if true the sequence goroutine waits until the time of the next date
 	// to pass it to the channel
 	realtime bool
@@ -75,47 +62,49 @@ type sequence struct {
 
 func Sequence(begin chron.Time) *sequence {
 	return &sequence{
-		begin: begin,
+		begin: begin.AsTimeExact(),
 		bsize: 8,
+		end: chron.MaxValue(),
 	}
 }
 
 func (s *sequence) End(end chron.Time) *sequence {
-	s.end = &end
+	s.end = end.AsTimeExact()
 	return s
 }
 
-func (s *sequence) InvertTime() *sequence {
-	s.inverseTime = true
+func (s *sequence) EndIncl(end chron.Time) *sequence {
+	s.end = end.Increment(length.Nano).AsTimeExact()
 	return s
 }
 
-func (s *sequence) FixedIncrement(len chron.Length, n int) *sequence {
+func (s *sequence) Increment(len chron.Length, n int) *sequence {
 	if n < 1 {
 		panic("sequence.FixedIncrement passed an out of range n, positive non-zero ints only.")
 	}
-	s.incLength = len
-	s.incN = n
+	s.increment = len
+	s.incn = n
 	return s
 }
 
-func (s *sequence) DynamicIncrement(f DynamicIncrementFunc) *sequence {
-	s.incDynamic = f
+func (s *sequence) IncrementFn(f func(chron.Time) chron.Length) *sequence {
+	s.incrementFn = f
 	return s
 }
 
-func (s *sequence) FixedOffset(len chron.Length) *sequence {
-	s.offset = &len
+// Repeats the same time n times before moving to the next
+func (s *sequence) Repeats(n int) {
+	s.repeats = n
+}
+
+func (s *sequence) Offset(len chron.Length, n int) *sequence {
+	s.offset = len
+	s.offn = n
 	return s
 }
 
-func (s *sequence) DynamicOffset(f DynamicOffsetFunc) *sequence {
-	s.offsetDynamic = f
-	return s
-}
-
-func (s *sequence) WithContext(ctx context.Context) *sequence {
-	s.ctx = ctx
+func (s *sequence) OffsetFn(f func(chron.Time) chron.Length) *sequence {
+	s.offsetFn = f
 	return s
 }
 
@@ -129,437 +118,391 @@ func (s *sequence) ChanSize(i int) *sequence {
 	return s
 }
 
-func (s *sequence) TimeChan() <-chan chron.Time {
-	return s.start()
-}
+type stop func()
 
-func (s *sequence) YearChan() <-chan chron.Year {
-	datech := s.start()
-	yearch := make(chan date.Year, s.bsize)
-	go func() {
-		defer close(yearch)
-		for d := range datech {
-			yearch <- d.ToYear()
+func (s *sequence) TimeChan() (<-chan time.Time, stop) {
+	in, canc := s.start()
+	out := make(chan time.Time, s.bsize)
+	stop := func() {
+		canc()
+		for t := range out {
+			seeya(t)
 		}
-	}()
-	return yearch
-}
-
-func (s *sequence) MonthChan() <-chan chron.Month {
-	datech := s.start()
-	ch := make(chan date.Month, s.bsize)
-	go func() {
-		defer close(ch)
-		for d := range datech {
-			ch <- d.ToMonth()
-		}
-	}()
-	return ch
-}
-
-func (s *sequence) DayChan() <-chan chron.Day {
-	datech := s.start()
-	ch := make(chan date.Day, s.bsize)
-	go func() {
-		defer close(ch)
-		for d := range datech {
-			ch <- d.ToDay()
-		}
-	}()
-	return ch
-}
-
-func (s *sequence) HourChan() <-chan chron.Hour {
-	datech := s.start()
-	ch := make(chan date.Hour, s.bsize)
-	go func() {
-		defer close(ch)
-		for d := range datech {
-			ch <- d.ToHour()
-		}
-	}()
-	return ch
-}
-
-func (s *sequence) MinuteChan() <-chan chron.Minute {
-	datech := s.start()
-	ch := make(chan date.Minute, s.bsize)
-	go func() {
-		defer close(ch)
-		for d := range datech {
-			ch <- d.ToMinute()
-		}
-	}()
-	return ch
-}
-
-func (s *sequence) SecondChan() <-chan chron.Second {
-	datech := s.start()
-	ch := make(chan date.Second, s.bsize)
-	go func() {
-		defer close(ch)
-		for d := range datech {
-			ch <- d.ToSecond()
-		}
-	}()
-	return ch
-}
-
-// Asynchronous. It is the clients responsibility to
-// read from the channel until close.
-func (s *sequence) Stop() {
-	go func() { s.internalCanc() }()
-}
-
-// I'm preeetty sure this is an anti-pattern. I sort of see use cases for it though.
-// Like when someone wants a buffered channel that closes immediately when stop is called
-func (s *sequence) Halt() {
-	s.Stop()
-	for d := range s.outgoing {
-		goodbye(d)
 	}
+	go func() {
+		defer close(out)
+		for t := range in {
+			out <- t.AsTime()
+		}
+	}()
+	return out, stop
 }
 
-func goodbye(d chron.Time) {}
 
-func (s *sequence) start() <-chan chron.Time {
-	// check that an increment method was setup
-	if s.incUnit == 0 && s.incInterval == nil && s.incDynamic == nil {
+func (s *sequence) ExactTimeChan() (<-chan chron.TimeExact, stop) {
+	in, canc := s.start()
+	out := make(chan chron.TimeExact, s.bsize)
+	stop := func() {
+		canc()
+		for t := range out {
+			goodbye(t)
+		}
+	}
+	go func() {
+		defer close(out)
+		for d := range in {
+			out <- d
+		}
+	}()
+	return out, stop
+}
+
+func (s *sequence) YearChan() (<-chan chron.Year, stop) {
+	in, canc := s.start()
+	out := make(chan chron.Year, s.bsize)
+	stop := func() {
+		canc()
+		for t := range out {
+			goodbye(t)
+		}
+	}
+	go func() {
+		defer close(out)
+		for d := range in {
+			out <- d.AsYear()
+		}
+	}()
+	return out, stop
+}
+
+func (s *sequence) MonthChan() (<-chan chron.Month, stop) {
+	in, canc := s.start()
+	out := make(chan chron.Month, s.bsize)
+	stop := func() {
+		canc()
+		for t := range out {
+			goodbye(t)
+		}
+	}
+	go func() {
+		defer close(out)
+		for d := range in {
+			out <- d.AsMonth()
+		}
+	}()
+	return out, stop
+}
+
+func (s *sequence) DayChan() (<-chan chron.Day, stop) {
+	in, canc := s.start()
+	out := make(chan chron.Day, s.bsize)
+	stop := func() {
+		canc()
+		for t := range out {
+			goodbye(t)
+		}
+	}
+	go func() {
+		defer close(out)
+		for d := range in {
+			out <- d.AsDay()
+		}
+	}()
+	return out, stop
+}
+
+func (s *sequence) HourChan() (<-chan chron.Hour, stop) {
+	in, canc := s.start()
+	out := make(chan chron.Hour, s.bsize)
+	stop := func() {
+		canc()
+		for t := range out {
+			goodbye(t)
+		}
+	}
+	go func() {
+		defer close(out)
+		for d := range in {
+			out <- d.AsHour()
+		}
+	}()
+	return out, stop
+}
+
+func (s *sequence) MinuteChan() (<-chan chron.Minute, stop) {
+	in, canc := s.start()
+	out := make(chan chron.Minute, s.bsize)
+	stop := func() {
+		canc()
+		for t := range out {
+			goodbye(t)
+		}
+	}
+	go func() {
+		defer close(out)
+		for d := range in {
+			out <- d.AsMinute()
+		}
+	}()
+	return out, stop
+}
+
+func (s *sequence) SecondChan() (<-chan chron.Second, stop) {
+	in, canc := s.start()
+	out := make(chan chron.Second, s.bsize)
+	stop := func() {
+		canc()
+		for t := range out {
+			goodbye(t)
+		}
+	}
+	go func() {
+		defer close(out)
+		for d := range in {
+			out <- d.AsSecond()
+		}
+	}()
+	return out, stop
+}
+
+
+func goodbye(t chron.Time) {}
+
+func seeya(t time.Time) {}
+
+//future experiment
+/*func convertStream(in chan chron.Time, out chan chron.Time, unit length.Unit) {
+	go func() {
+		defer close(out)
+		for d := range in {
+			out <- unit.Convert(d)
+		}
+	}()
+}*/
+
+
+func (s *sequence) start() (<-chan chron.TimeExact, context.CancelFunc) {
+
+	// setup internal context and cancel
+	ctx, canc := context.WithCancel(context.Background())
+
+	var out <-chan chron.TimeExact
+	// pick the right goroutine to start up based sequence fields
+	if s.incrementFn != nil {
+		out = s.variableIncs(ctx)
+	} else if s.increment != nil {
+		out = s.fixedIncs(ctx)
+	} else {
 		panic("invalid sequence initialization. an increment method must be supplied")
 	}
 
-	// setup internal context and cancel
-	if s.ctx == nil {
-		s.internalCtx, s.internalCanc = context.WithCancel(context.Background())
-		s.ctx = s.internalCtx
-	} else {
-		s.internalCtx, s.internalCanc = context.WithCancel(s.ctx)
-	}
-
-	// set end
-	if s.end == nil {
-		if s.inverseTime {
-			min := date.MinValue()
-			s.end = &min
-		} else {
-			max := date.MaxValue()
-			s.end = &max
-		}
-	}
-
-	// pick the right goroutine to start up based sequence fields
-	if s.incDynamic != nil {
-		s.outgoing = s.dynamicallyIncremented()
-	} else if s.incInterval != nil {
-		s.outgoing = s.intervalIncremented()
-	} else {
-		s.outgoing = s.unitIncremented()
-	}
-
 	if s.realtime {
-		rtchan := make(chan date.Date, s.bsize)
+		rtchan := make(chan chron.TimeExact, s.bsize)
 		go func() {
 			defer close(rtchan)
-			for d := range s.outgoing {
-				until := time.Until(d.Time())
+			for t := range out {
+				until := time.Until(t.Time)
 				if until > 0 {
 					time.Sleep(until)
 				}
-				rtchan <- d
+				rtchan <- t
 			}
 		}()
-		return rtchan
+		return rtchan, canc
 	}
-	return s.outgoing
+	return out, canc
 }
 
 // One of the six possible goroutines starts
-func (s *sequence) unitIncremented() <-chan date.Date {
-	outgoing := make(chan date.Date, s.bsize)
-	if s.offsetDynamic != nil {
-		if s.inverseTime {
-			// back in time, unit incremented, with dynamic offset fn
-			go func() {
-				defer close(outgoing)
-				curr := s.begin
-				for curr.After(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
-						return
-					}
-					outgoing <- curr.Increment(s.offsetDynamic(curr))
-					curr = curr.Sub(s.incUnit, s.incN)
-				}
-			}()
-			return outgoing
-		} else {
-			// forward in time, unit incremented, with dynamic offset fn
-			go func() {
-				defer close(outgoing)
-				curr := s.begin
-				for curr.Before(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
-						return
-					}
-					outgoing <- curr.Increment(s.offsetDynamic(curr))
-					curr = curr.Add(s.incUnit, s.incN)
-				}
-			}()
-			return outgoing
-		}
-	}
-	if s.offset != nil {
-		if s.inverseTime {
-			// back in time, unit incremented, with a fixed offset
-			go func() {
-				defer close(outgoing)
-				curr := s.begin
-				for curr.After(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
-						return
-					}
-					outgoing <- curr.Increment(*s.offset)
-					curr = curr.Sub(s.incUnit, s.incN)
-				}
-			}()
-			return outgoing
-		} else {
-			// forward in time, unit incremented, with a fixed offset
-			go func() {
-				defer close(outgoing)
-				curr := s.begin
-				for curr.Before(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
-						return
-					}
-					outgoing <- curr.Increment(*s.offset)
-					curr = curr.Add(s.incUnit, s.incN)
-				}
-			}()
-			return outgoing
-		}
-	}
-
-	if s.inverseTime {
-		// back in time, unit incremented, no offset
-		go func() {
-			defer close(outgoing)
-			curr := s.begin
-			for curr.After(*s.end) {
-				if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
-					return
-				}
-				outgoing <- curr
-				curr = curr.Sub(s.incUnit, s.incN)
-			}
-		}()
-		return outgoing
-	} else {
-		// forward in time, unit incremented, no offset
-		go func() {
-			defer close(outgoing)
-			curr := s.begin
-			for curr.Before(*s.end) {
-				if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
-					return
-				}
-				outgoing <- curr
-				curr = curr.Add(s.incUnit, s.incN)
-			}
-		}()
-		return outgoing
-	}
-}
-
-// One of the six possible goroutines starts
-func (s *sequence) intervalIncremented() <-chan date.Date {
-	outgoing := make(chan date.Date, s.bsize)
-	if s.offsetDynamic != nil {
-		if s.inverseTime {
+func (s *sequence) fixedIncs(ctx context.Context) <-chan chron.TimeExact {
+	out := make(chan chron.TimeExact, s.bsize)
+	if s.offsetFn != nil {
+		if s.begin.After(s.end.Time) {
 			// back in time, interval incremented, with dynamic offset fn
 			go func() {
-				defer close(outgoing)
+				defer close(out)
 				curr := s.begin
-				for curr.After(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+				for curr.After(s.end.Time) {
+					if ctx.Err() != nil {
 						return
 					}
-					outgoing <- curr.Increment(s.offsetDynamic(curr))
-					curr = curr.Decrement(*s.incInterval)
+					out <- curr.Increment(s.offsetFn(curr))
+					curr = curr.Decrement(s.increment)
 				}
 			}()
-			return outgoing
+			return out
 		} else {
 			// forward in time, interval incremented, with dynamic offset fn
 			go func() {
-				defer close(outgoing)
+				defer close(out)
 				curr := s.begin
-				for curr.Before(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+				for curr.Before(s.end.Time) {
+					if ctx != nil {
 						return
 					}
-					outgoing <- curr.Increment(s.offsetDynamic(curr))
-					curr = curr.Increment(*s.incInterval)
+					out <- curr.Increment(s.offsetFn(curr))
+					curr = curr.Increment(s.increment)
 				}
 			}()
-			return outgoing
+			return out
 		}
 	}
 	if s.offset != nil {
-		if s.inverseTime {
+		if s.begin.After(s.end.Time) {
 			// back in time, interval incremented, with a fixed offset
 			go func() {
-				defer close(outgoing)
+				defer close(out)
 				curr := s.begin
-				for curr.After(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+				for curr.After(s.end.Time) {
+					if ctx.Err() != nil {
 						return
 					}
-					outgoing <- curr.Increment(*s.offset)
-					curr = curr.Decrement(*s.incInterval)
+					out <- curr.Increment(s.offset)
+					curr = curr.Decrement(s.increment)
 				}
 			}()
-			return outgoing
+			return out
 		} else {
 			// forward in time, interval incremented, with a fixed offset
 			go func() {
-				defer close(outgoing)
+				defer close(out)
 				curr := s.begin
-				for curr.Before(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+				for curr.Before(s.end.Time) {
+					if ctx.Err() != nil {
 						return
 					}
-					outgoing <- curr.Increment(*s.offset)
-					curr = curr.Increment(*s.incInterval)
+					out <- curr.Increment(s.offset)
+					curr = curr.Increment(s.increment)
 				}
 			}()
-			return outgoing
+			return out
 		}
 	}
 
-	if s.inverseTime {
+	if s.begin.After(s.end.Time) {
 		// back in time, interval incremented, no offset
 		go func() {
-			defer close(outgoing)
+			defer close(out)
 			curr := s.begin
-			for curr.After(*s.end) {
-				if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+			for curr.After(s.end.Time) {
+				if ctx.Err() != nil {
 					return
 				}
-				outgoing <- curr
-				curr = curr.Decrement(*s.incInterval)
+				out <- curr
+				curr = curr.Decrement(s.increment)
 			}
 		}()
-		return outgoing
+		return out
 	} else {
 		// forward in time, interval incremented, no offset
 		go func() {
-			defer close(outgoing)
+			defer close(out)
 			curr := s.begin
-			for curr.Before(*s.end) {
-				if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+			for curr.Before(s.end.Time) {
+				if ctx.Err() != nil {
 					return
 				}
-				outgoing <- curr
-				curr = curr.Increment(*s.incInterval)
+				out <- curr
+				curr = curr.Increment(s.increment)
 			}
 		}()
-		return outgoing
+		return out
 	}
 }
 
 // One of the six possible goroutines starts
-func (s *sequence) dynamicallyIncremented() <-chan date.Date {
-	outgoing := make(chan date.Date, s.bsize)
-	if s.offsetDynamic != nil {
-		if s.inverseTime {
+func (s *sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
+	out := make(chan chron.TimeExact, s.bsize)
+	if s.offsetFn != nil {
+		if s.begin.After(s.end.Time) {
 			// back in time, interval incremented, with dynamic offset fn
 			go func() {
-				defer close(outgoing)
+				defer close(out)
 				curr := s.begin
-				for curr.After(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+				for curr.After(s.end.Time) {
+					if ctx.Err() != nil {
 						return
 					}
-					outgoing <- curr.Increment(s.offsetDynamic(curr))
-					curr = curr.Decrement(s.incDynamic())
+					out <- curr.Increment(s.offsetFn(curr))
+					curr = curr.Decrement(s.incrementFn(curr))
 				}
 			}()
-			return outgoing
+			return out
 		} else {
 			// forward in time, interval incremented, with dynamic offset fn
 			go func() {
-				defer close(outgoing)
+				defer close(out)
 				curr := s.begin
-				for curr.Before(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+				for curr.Before(s.end.Time) {
+					if ctx != nil {
 						return
 					}
-					outgoing <- curr.Increment(s.offsetDynamic(curr))
-					curr = curr.Increment(s.incDynamic())
+					out <- curr.Increment(s.offsetFn(curr))
+					curr = curr.Increment(s.incrementFn(curr))
 				}
 			}()
-			return outgoing
+			return out
 		}
 	}
 	if s.offset != nil {
-		if s.inverseTime {
+		if s.begin.After(s.end.Time) {
 			// back in time, interval incremented, with a fixed offset
 			go func() {
-				defer close(outgoing)
+				defer close(out)
 				curr := s.begin
-				for curr.After(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+				for curr.After(s.end.Time) {
+					if ctx.Err() != nil {
 						return
 					}
-					outgoing <- curr.Increment(*s.offset)
-					curr = curr.Decrement(s.incDynamic())
+					out <- curr.Increment(s.offset)
+					curr = curr.Decrement(s.incrementFn(curr))
 				}
 			}()
-			return outgoing
+			return out
 		} else {
 			// forward in time, interval incremented, with a fixed offset
 			go func() {
-				defer close(outgoing)
+				defer close(out)
 				curr := s.begin
-				for curr.Before(*s.end) {
-					if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+				for curr.Before(s.end.Time) {
+					if ctx.Err() != nil {
 						return
 					}
-					outgoing <- curr.Increment(*s.offset)
-					curr = curr.Increment(s.incDynamic())
+					out <- curr.Increment(s.offset)
+					curr = curr.Increment(s.incrementFn(curr))
 				}
 			}()
-			return outgoing
+			return out
 		}
 	}
 
-	if s.inverseTime {
+	if s.begin.After(s.end.Time) {
 		// back in time, interval incremented, no offset
 		go func() {
-			defer close(outgoing)
+			defer close(out)
 			curr := s.begin
-			for curr.After(*s.end) {
-				if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+			for curr.After(s.end.Time) {
+				if ctx.Err() != nil {
 					return
 				}
-				outgoing <- curr
-				curr = curr.Decrement(s.incDynamic())
+				out <- curr
+				curr = curr.Decrement(s.incrementFn(curr))
 			}
 		}()
-		return outgoing
+		return out
 	} else {
 		// forward in time, interval incremented, no offset
 		go func() {
-			defer close(outgoing)
+			defer close(out)
 			curr := s.begin
-			for curr.Before(*s.end) {
-				if s.ctx.Err() != nil || s.internalCtx.Err() != nil {
+			for curr.Before(s.end.Time) {
+				if ctx.Err() != nil {
 					return
 				}
-				outgoing <- curr
-				curr = curr.Increment(s.incDynamic())
+				out <- curr
+				curr = curr.Increment(s.incrementFn(curr))
 			}
 		}()
-		return outgoing
+		return out
 	}
 }
