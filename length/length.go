@@ -14,6 +14,42 @@ type Duration struct {
 	Dur   time.Duration
 }
 
+func Years(y int) Duration {
+	return Duration{Year: y}
+}
+
+func Months(m int) Duration {
+	return Duration{Month: m}
+}
+
+func Days(d int) Duration {
+	return Duration{Day: d}
+}
+
+func Hours(h int) Duration {
+	return Duration{Dur: time.Duration(int(time.Hour) * h)}
+}
+
+func Mins(m int) Duration {
+	return Duration{Dur: time.Duration(int(time.Minute) * m)}
+}
+
+func Secs(s int) Duration {
+	return Duration{Dur: time.Duration(int(time.Second) * s)}
+}
+
+func Millis(m int) Duration {
+	return Duration{Dur: time.Duration(int(time.Millisecond) * m)}
+}
+
+func Micros(m int) Duration {
+	return Duration{Dur: time.Duration(int(time.Microsecond) * m)}
+}
+
+func Nanos(n int) Duration {
+	return Duration{Dur: time.Duration(int(time.Nanosecond) * n)}
+}
+
 func (d Duration) Mult(n int) Duration {
 	return Duration{
 		Year:  d.Year * n,
@@ -21,6 +57,17 @@ func (d Duration) Mult(n int) Duration {
 		Day:   d.Day * n,
 		Dur:   time.Duration(int(d.Dur) * n),
 	}
+}
+
+func Sum(durs ...Duration) Duration {
+	d := Duration{}
+	for _, dur := range durs {
+		d.Year = d.Year + dur.Year
+		d.Month = d.Month + dur.Month
+		d.Day = d.Day + dur.Day
+		d.Dur = time.Duration(int(d.Dur) + int(dur.Dur))
+	}
+	return d
 }
 
 func (d Duration) Years() int {
@@ -40,7 +87,7 @@ func (d Duration) Duration() time.Duration {
 }
 
 func (d Duration) String() string {
-	return fmt.Sprintf("%syrs %smons %sdays %snanos", d.Year, d.Month, d.Day, d.Dur)
+	return fmt.Sprintf("%vyrs %vmons %vdays %s", d.Year, d.Month, d.Day, d.Dur)
 }
 
 // TimeUnit represents a length of time for use in switch statements.
@@ -101,15 +148,6 @@ var durations = []Duration{
 
 	}
 }*/
-
-func (u Unit) Mult(n int) Duration {
-	return Duration{
-		Year:  u.Years() * n,
-		Month: u.Months() * n,
-		Day:   u.Days() * n,
-		Dur:   time.Duration(int(u.Duration()) * n),
-	}
-}
 
 func (u Unit) Years() int {
 	return durations[int(u)].Year

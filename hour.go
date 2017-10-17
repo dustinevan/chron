@@ -14,6 +14,10 @@ func NewHour(year int, month time.Month, day, hour int) Hour {
 	return Hour{time.Date(year, month, day, hour, 0, 0, 0, time.UTC)}
 }
 
+func ThisHour() Hour {
+	return Now().AsHour()
+}
+
 func HourOf(time time.Time) Hour {
 	return NewHour(time.Year(), time.Month(), time.Day(), time.Hour())
 }

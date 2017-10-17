@@ -14,6 +14,10 @@ func NewMicro(year int, month time.Month, day, hour, min, sec, micro int) Micro 
 	return Micro{time.Date(year, month, day, hour, min, sec, micro*1000, time.UTC)}
 }
 
+func ThisMicro() Micro {
+	return Now().AsMicro()
+}
+
 func MicroOf(t time.Time) Micro {
 	return Micro{t.Truncate(time.Microsecond)}
 }

@@ -14,6 +14,10 @@ func NewSecond(year int, month time.Month, day, hour, min, sec int) Second {
 	return Second{time.Date(year, month, day, hour, min, sec, 0, time.UTC)}
 }
 
+func ThisSecond() Second {
+	return Now().AsSecond()
+}
+
 func SecondOf(t time.Time) Second {
 	return Second{t.Truncate(time.Second)}
 }
@@ -34,7 +38,7 @@ func (s Second) Increment(l Length) TimeExact {
 }
 
 func (s Second) Decrement(l Length) TimeExact {
-	return TimeExact{s.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1*l.Duration())}
+	return TimeExact{s.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (s Second) AddN(n int) Second {

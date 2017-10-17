@@ -14,6 +14,10 @@ func NewYear(year int) Year {
 	return Year{time.Date(year, time.Month(1), 1, 0, 0, 0, 0, time.UTC)}
 }
 
+func ThisYear() Year {
+	return Now().AsYear()
+}
+
 func YearOf(time time.Time) Year {
 	return NewYear(time.Year())
 }
@@ -34,7 +38,7 @@ func (y Year) Increment(l Length) TimeExact {
 }
 
 func (y Year) Decrement(l Length) TimeExact {
-	return TimeExact{y.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1*l.Duration())}
+	return TimeExact{y.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (y Year) AddN(n int) Year {

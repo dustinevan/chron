@@ -14,6 +14,10 @@ func NewMonth(year int, month time.Month) Month {
 	return Month{time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)}
 }
 
+func ThisMonth() Month {
+	return Now().AsMonth()
+}
+
 func MonthOf(time time.Time) Month {
 	return NewMonth(time.Year(), time.Month())
 }

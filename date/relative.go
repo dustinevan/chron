@@ -2,6 +2,7 @@ package date
 
 import (
 	"time"
+
 	"github.com/dustinevan/time/chron"
 )
 
@@ -69,7 +70,6 @@ func (nth NthWeekDay) OfYear(y chron.Year) (chron.Day, bool) {
 	return result, true
 }
 
-
 func LastWeekdayOfMonth(m chron.Month, w time.Weekday) chron.Day {
 	nth := NewNthWeekDay(w, -1)
 	return nth.Date(m.AddN(1).AsDay())
@@ -79,7 +79,6 @@ func LastWeekdayOfYear(y chron.Year, w time.Weekday) chron.Day {
 	nth := NewNthWeekDay(w, -1)
 	return nth.Date(y.AddN(1).AsDay())
 }
-
 
 // Example: The M-F date of the US observance of Christmas Day when Christmas falls on a weekend.
 func ClosestNonWeekend(d chron.Day) chron.Day {

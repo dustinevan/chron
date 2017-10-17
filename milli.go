@@ -14,6 +14,10 @@ func NewMilli(year int, month time.Month, day, hour, min, sec, milli int) Milli 
 	return Milli{time.Date(year, month, day, hour, min, sec, milli*1000000, time.UTC)}
 }
 
+func ThisMilli() Milli {
+	return Now().AsMilli()
+}
+
 func MilliOf(t time.Time) Milli {
 	return Milli{t.Truncate(time.Millisecond)}
 }

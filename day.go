@@ -14,6 +14,10 @@ func NewDay(year int, month time.Month, day int) Day {
 	return Day{time.Date(year, month, day, 0, 0, 0, 0, time.UTC)}
 }
 
+func Today() Day {
+	return Now().AsDay()
+}
+
 func DayOf(time time.Time) Day {
 	return NewDay(time.Year(), time.Month(), time.Day())
 }

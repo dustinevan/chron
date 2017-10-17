@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"time"
+
 	"github.com/dustinevan/chron"
 	"github.com/dustinevan/chron/length"
 )
@@ -31,8 +32,8 @@ type sequence struct {
 
 	// constantIncrement is the length added to get the next seq time.
 	increment chron.Length
-	incn int
-	repeats       int
+	incn      int
+	repeats   int
 
 	// variableIncrementFn takes precedence over constantIncrement; The
 	// sequence is incremented by the returned Length
@@ -44,7 +45,7 @@ type sequence struct {
 	// used to calculate the next seq time. e.g. seq bases the next
 	// date off curr not curr + offset.
 	offset chron.Length
-	offn int
+	offn   int
 	// variableOffset takes precedence over constantOffset. A good example
 	// use case is random offsets the spread the sequence times across an
 	// hour.
@@ -64,7 +65,7 @@ func Sequence(begin chron.Time) *sequence {
 	return &sequence{
 		begin: begin.AsTimeExact(),
 		bsize: 8,
-		end: chron.MaxValue(),
+		end:   chron.MaxValue(),
 	}
 }
 
@@ -78,11 +79,13 @@ func (s *sequence) EndIncl(end chron.Time) *sequence {
 	return s
 }
 
-func (s *sequence) Increment(len chron.Length, n int) *sequence {
-	if n < 1 {
-		panic("sequence.FixedIncrement passed an out of range n, positive non-zero ints only.")
-	}
-	s.increment = len.Mult(n)
+func (s *sequence) Length(len chron.Length) *sequence {
+	s.end = s.begin.Increment(len)
+	return s
+}
+
+func (s *sequence) Increment(len chron.Length) *sequence {
+	s.increment = len
 	return s
 }
 
@@ -96,8 +99,8 @@ func (s *sequence) Repeats(n int) {
 	s.repeats = n
 }
 
-func (s *sequence) Offset(len chron.Length, n int) *sequence {
-	s.offset = len.Mult(n)
+func (s *sequence) Offset(len chron.Length) *sequence {
+	s.offset = len
 	return s
 }
 
@@ -135,7 +138,6 @@ func (s *sequence) TimeChan() (<-chan time.Time, stop) {
 	}()
 	return out, stop
 }
-
 
 func (s *sequence) ExactTimeChan() (<-chan chron.TimeExact, stop) {
 	in, canc := s.start()
@@ -263,7 +265,6 @@ func (s *sequence) SecondChan() (<-chan chron.Second, stop) {
 	return out, stop
 }
 
-
 func goodbye(t chron.Time) {}
 
 func seeya(t time.Time) {}
@@ -277,7 +278,6 @@ func seeya(t time.Time) {}
 		}
 	}()
 }*/
-
 
 func (s *sequence) start() (<-chan chron.TimeExact, context.CancelFunc) {
 

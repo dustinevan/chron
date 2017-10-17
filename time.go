@@ -63,7 +63,7 @@ func ZeroValue() TimeExact {
 // and time.Unix() implementation
 var unixToInternal = int64((1969*365 + 1969/4 - 1969/100 + 1969/400) * 24 * 60 * 60)
 var max = time.Unix(1<<63-1-unixToInternal, 999999999).UTC()
-var min = time.Unix( -1*int64(^uint(0) >> 1)-1+unixToInternal, 0).UTC()
+var min = time.Unix(-1*int64(^uint(0)>>1)-1+unixToInternal, 0).UTC()
 
 func MaxValue() TimeExact {
 	return TimeOf(max)

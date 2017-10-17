@@ -14,6 +14,10 @@ func NewMinute(year int, month time.Month, day, hour, min int) Minute {
 	return Minute{time.Date(year, month, day, hour, min, 0, 0, time.UTC)}
 }
 
+func ThisMinute() Minute {
+	return Now().AsMinute()
+}
+
 func MinuteOf(time time.Time) Minute {
 	return NewMinute(time.Year(), time.Month(), time.Day(), time.Hour(), time.Minute())
 }
