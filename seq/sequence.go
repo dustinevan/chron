@@ -82,8 +82,7 @@ func (s *sequence) Increment(len chron.Length, n int) *sequence {
 	if n < 1 {
 		panic("sequence.FixedIncrement passed an out of range n, positive non-zero ints only.")
 	}
-	s.increment = len
-	s.incn = n
+	s.increment = len.Mult(n)
 	return s
 }
 
@@ -98,8 +97,7 @@ func (s *sequence) Repeats(n int) {
 }
 
 func (s *sequence) Offset(len chron.Length, n int) *sequence {
-	s.offset = len
-	s.offn = n
+	s.offset = len.Mult(n)
 	return s
 }
 
