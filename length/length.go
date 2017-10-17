@@ -14,6 +14,15 @@ type Duration struct {
 	Dur   time.Duration
 }
 
+func (d Duration) Mult(n int) Duration {
+	return Duration{
+		Year:  d.Year * n,
+		Month: d.Month * n,
+		Day:   d.Day * n,
+		Dur:   time.Duration(int(d.Dur) * n),
+	}
+}
+
 func (d Duration) Years() int {
 	return d.Year
 }
@@ -92,6 +101,15 @@ var durations = []Duration{
 
 	}
 }*/
+
+func (u Unit) Mult(n int) Duration {
+	return Duration{
+		Year:  u.Years() * n,
+		Month: u.Months() * n,
+		Day:   u.Days() * n,
+		Dur:   time.Duration(int(u.Duration()) * n),
+	}
+}
 
 func (u Unit) Years() int {
 	return durations[int(u)].Year
