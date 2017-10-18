@@ -1,4 +1,4 @@
-package date
+package rtime
 
 import (
 	"time"
@@ -25,9 +25,7 @@ const (
 
 )
 
-type YearDayFunc func(chron.Year) chron.Day
-
-var actualHolidays = []YearDayFunc{
+var actualHolidays = []MonthDay{
 	// NewYearsDay
 	func(y chron.Year) chron.Day {
 		return y.AsDay()
@@ -85,7 +83,7 @@ var actualHolidays = []YearDayFunc{
 	},
 }
 
-var holidayObservances = []YearDayFunc{
+var holidayObservances = []MonthDay{
 	func(y chron.Year) chron.Day {
 		return ClosestNonWeekend(NewYearsDay.Date(y))
 	},

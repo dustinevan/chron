@@ -37,7 +37,7 @@ type sequence struct {
 
 	// variableIncrementFn takes precedence over constantIncrement; The
 	// sequence is incremented by the returned Length
-	incrementFn func(chron.Time) chron.Length
+	incrementFn func(exact chron.TimeExact) chron.TimeExact
 
 	// -- Offset Fields --
 
@@ -89,7 +89,7 @@ func (s *sequence) Increment(len chron.Length) *sequence {
 	return s
 }
 
-func (s *sequence) IncrementFn(f func(chron.Time) chron.Length) *sequence {
+func (s *sequence) IncrementFn(f func(chron.TimeExact) chron.TimeExact) *sequence {
 	s.incrementFn = f
 	return s
 }
@@ -269,16 +269,6 @@ func goodbye(t chron.Time) {}
 
 func seeya(t time.Time) {}
 
-//future experiment
-/*func convertStream(in chan chron.Time, out chan chron.Time, unit length.Unit) {
-	go func() {
-		defer close(out)
-		for d := range in {
-			out <- unit.Convert(d)
-		}
-	}()
-}*/
-
 func (s *sequence) start() (<-chan chron.TimeExact, context.CancelFunc) {
 
 	// setup internal context and cancel
@@ -422,7 +412,7 @@ func (s *sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
 						return
 					}
 					out <- curr.Increment(s.offsetFn(curr))
-					curr = curr.Decrement(s.incrementFn(curr))
+					curr = s.incrementFn(curr)
 				}
 			}()
 			return out
@@ -436,7 +426,7 @@ func (s *sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
 						return
 					}
 					out <- curr.Increment(s.offsetFn(curr))
-					curr = curr.Increment(s.incrementFn(curr))
+					curr = s.incrementFn(curr)
 				}
 			}()
 			return out
@@ -453,7 +443,7 @@ func (s *sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
 						return
 					}
 					out <- curr.Increment(s.offset)
-					curr = curr.Decrement(s.incrementFn(curr))
+					curr = s.incrementFn(curr)
 				}
 			}()
 			return out
@@ -467,7 +457,7 @@ func (s *sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
 						return
 					}
 					out <- curr.Increment(s.offset)
-					curr = curr.Increment(s.incrementFn(curr))
+					curr = s.incrementFn(curr)
 				}
 			}()
 			return out
@@ -484,7 +474,7 @@ func (s *sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
 					return
 				}
 				out <- curr
-				curr = curr.Decrement(s.incrementFn(curr))
+				curr = s.incrementFn(curr)
 			}
 		}()
 		return out
@@ -498,7 +488,7 @@ func (s *sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
 					return
 				}
 				out <- curr
-				curr = curr.Increment(s.incrementFn(curr))
+				curr = s.incrementFn(curr)
 			}
 		}()
 		return out
