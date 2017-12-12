@@ -12,9 +12,9 @@ import (
 func main() {
 	mins, _ := seq.Sequence(chron.ThisHour().AddN(1)).
 		Length(length.Hours(12)).
-		//Increment(length.Hours(1)).
+		Increment(length.Hours(1)).
 		IncrementFn()
-		Offset(length.Mins(15)).
+	Offset(length.Mins(15)).
 		TimeChan()
 
 	for m := range mins {
