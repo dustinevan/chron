@@ -5,11 +5,15 @@ import (
 
 	"time"
 
+	"fmt"
+
 	"github.com/dustinevan/chron"
 	"github.com/dustinevan/chron/length"
 )
 
-type sequence struct {
+type SeqOption func(*Sequence) error
+
+type Sequence struct {
 
 	// -- Boundary and Flow --
 
@@ -32,7 +36,6 @@ type sequence struct {
 
 	// constantIncrement is the length added to get the next seq time.
 	increment chron.Length
-	incn      int
 	repeats   int
 
 	// variableIncrementFn takes precedence over constantIncrement; The
@@ -45,14 +48,13 @@ type sequence struct {
 	// used to calculate the next seq time. e.g. seq bases the next
 	// date off curr not curr + offset.
 	offset chron.Length
-	offn   int
 	// variableOffset takes precedence over constantOffset. A good example
 	// use case is random offsets the spread the sequence times across an
 	// hour.
 	offsetFn func(chron.Time) chron.Length
 
 	// -- Channel Buffering --
-	// Defaults to 8; set to 0 for unbuffered channels
+	// Defaults to 1; set to 0 for unbuffered channels
 	bsize int
 
 	// -- Synchronization --
@@ -61,67 +63,107 @@ type sequence struct {
 	realtime bool
 }
 
-func Sequence(begin chron.Time) *sequence {
-	return &sequence{
+func NewSequence(begin chron.Time, opts ...SeqOption) *Sequence {
+	s := &Sequence{
 		begin: begin.AsTimeExact(),
-		bsize: 8,
+		bsize: 1,
 		end:   chron.MaxValue(),
+	}
+	for _, opt := range opts {
+		err := opt(s)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return s
+}
+
+func End(end chron.Time) SeqOption {
+	return func(s *Sequence) error {
+		if s.negativeTime == false {
+			if s.begin.After(end.AsTime()) {
+				return fmt.Errorf("end %s and begin %s are inconsistent with negativeTime = %s",
+					s.end, s.begin, s.negativeTime)
+			}
+			s.end = end.AsTimeExact()
+			return nil
+
+		}
+		if s.begin.Before(end.AsTime()) {
+			return fmt.Errorf("end %s and begin %s are inconsistent with negativeTime = %s",
+				s.end, s.begin, s.negativeTime)
+		}
+		s.end = end.AsTimeExact()
+		return nil
 	}
 }
 
-func (s *sequence) End(end chron.Time) *sequence {
-	s.end = end.AsTimeExact()
-	return s
+func InclusiveEnd(end chron.Time) SeqOption {
+	return End(end.Increment(length.Nano))
 }
 
-func (s *sequence) EndIncl(end chron.Time) *sequence {
-	s.end = end.Increment(length.Nano).AsTimeExact()
-	return s
+func ForPeriod(len chron.Length) SeqOption {
+	return func(s *Sequence) error {
+		if s.negativeTime == false {
+			s.end = s.begin.Increment(len)
+			return nil
+		}
+		s.end = s.begin.Decrement(len)
+		return nil
+	}
 }
 
-func (s *sequence) Length(len chron.Length) *sequence {
-	s.end = s.begin.Increment(len)
-	return s
+func IncrementBy(len chron.Length) SeqOption {
+	return func(s *Sequence) error {
+		if s.incrementFn != nil {
+			return fmt.Errorf("IncrementBy called when a dynamic increment function is already set")
+		}
+		s.increment = len
+		return nil
+	}
 }
 
-func (s *sequence) Increment(len chron.Length) *sequence {
-	s.increment = len
-	return s
+func IncrementFn(f func(chron.TimeExact) chron.TimeExact) SeqOption {
+	return func(s *Sequence) error {
+		s.incrementFn = f
+		return nil
+	}
 }
 
-func (s *sequence) IncrementFn(f func(chron.TimeExact) chron.TimeExact) *sequence {
-	s.incrementFn = f
-	return s
+func OffsetBy(len chron.Length) SeqOption {
+	return func(s *Sequence) error {
+		if s.offsetFn != nil {
+			return fmt.Errorf("OffsetBy called when a dynamic offset function is already set")
+		}
+		s.increment = len
+		return nil
+	}
 }
 
-// Repeats the same time n times before moving to the next
-func (s *sequence) Repeats(n int) {
-	s.repeats = n
+func OffsetFn(f func(chron.Time) chron.Length) SeqOption {
+	return func(s *Sequence) error {
+		s.offsetFn = f
+		return nil
+	}
 }
 
-func (s *sequence) Offset(len chron.Length) *sequence {
-	s.offset = len
-	return s
+func RealTime() SeqOption {
+	return func(s *Sequence) error {
+		s.realtime = true
+		return nil
+	}
 }
 
-func (s *sequence) OffsetFn(f func(chron.Time) chron.Length) *sequence {
-	s.offsetFn = f
-	return s
-}
-
-func (s *sequence) RealTime() *sequence {
-	s.realtime = true
-	return s
-}
-
-func (s *sequence) ChanSize(i int) *sequence {
-	s.bsize = i
-	return s
+func ChanSize(i int) SeqOption {
+	return func(s *Sequence) error {
+		s.bsize = i
+		return nil
+	}
 }
 
 type stop func()
 
-func (s *sequence) TimeChan() (<-chan time.Time, stop) {
+func (s *Sequence) TimeChan() (<-chan time.Time, stop) {
 	in, canc := s.start()
 	out := make(chan time.Time, s.bsize)
 	stop := func() {
@@ -139,7 +181,7 @@ func (s *sequence) TimeChan() (<-chan time.Time, stop) {
 	return out, stop
 }
 
-func (s *sequence) ExactTimeChan() (<-chan chron.TimeExact, stop) {
+func (s *Sequence) ExactTimeChan() (<-chan chron.TimeExact, stop) {
 	in, canc := s.start()
 	out := make(chan chron.TimeExact, s.bsize)
 	stop := func() {
@@ -157,7 +199,7 @@ func (s *sequence) ExactTimeChan() (<-chan chron.TimeExact, stop) {
 	return out, stop
 }
 
-func (s *sequence) YearChan() (<-chan chron.Year, stop) {
+func (s *Sequence) YearChan() (<-chan chron.Year, stop) {
 	in, canc := s.start()
 	out := make(chan chron.Year, s.bsize)
 	stop := func() {
@@ -175,7 +217,7 @@ func (s *sequence) YearChan() (<-chan chron.Year, stop) {
 	return out, stop
 }
 
-func (s *sequence) MonthChan() (<-chan chron.Month, stop) {
+func (s *Sequence) MonthChan() (<-chan chron.Month, stop) {
 	in, canc := s.start()
 	out := make(chan chron.Month, s.bsize)
 	stop := func() {
@@ -193,7 +235,7 @@ func (s *sequence) MonthChan() (<-chan chron.Month, stop) {
 	return out, stop
 }
 
-func (s *sequence) DayChan() (<-chan chron.Day, stop) {
+func (s *Sequence) DayChan() (<-chan chron.Day, stop) {
 	in, canc := s.start()
 	out := make(chan chron.Day, s.bsize)
 	stop := func() {
@@ -211,7 +253,7 @@ func (s *sequence) DayChan() (<-chan chron.Day, stop) {
 	return out, stop
 }
 
-func (s *sequence) HourChan() (<-chan chron.Hour, stop) {
+func (s *Sequence) HourChan() (<-chan chron.Hour, stop) {
 	in, canc := s.start()
 	out := make(chan chron.Hour, s.bsize)
 	stop := func() {
@@ -229,7 +271,7 @@ func (s *sequence) HourChan() (<-chan chron.Hour, stop) {
 	return out, stop
 }
 
-func (s *sequence) MinuteChan() (<-chan chron.Minute, stop) {
+func (s *Sequence) MinuteChan() (<-chan chron.Minute, stop) {
 	in, canc := s.start()
 	out := make(chan chron.Minute, s.bsize)
 	stop := func() {
@@ -247,7 +289,7 @@ func (s *sequence) MinuteChan() (<-chan chron.Minute, stop) {
 	return out, stop
 }
 
-func (s *sequence) SecondChan() (<-chan chron.Second, stop) {
+func (s *Sequence) SecondChan() (<-chan chron.Second, stop) {
 	in, canc := s.start()
 	out := make(chan chron.Second, s.bsize)
 	stop := func() {
@@ -269,13 +311,13 @@ func goodbye(t chron.Time) {}
 
 func seeya(t time.Time) {}
 
-func (s *sequence) start() (<-chan chron.TimeExact, context.CancelFunc) {
+func (s *Sequence) start() (<-chan chron.TimeExact, context.CancelFunc) {
 
 	// setup internal context and cancel
 	ctx, canc := context.WithCancel(context.Background())
 
 	var out <-chan chron.TimeExact
-	// pick the right goroutine to start up based sequence fields
+	// pick the right goroutine to start up based on Sequence fields
 	if s.incrementFn != nil {
 		out = s.variableIncs(ctx)
 	} else if s.increment != nil {
@@ -302,7 +344,7 @@ func (s *sequence) start() (<-chan chron.TimeExact, context.CancelFunc) {
 }
 
 // One of the six possible goroutines starts
-func (s *sequence) fixedIncs(ctx context.Context) <-chan chron.TimeExact {
+func (s *Sequence) fixedIncs(ctx context.Context) <-chan chron.TimeExact {
 	out := make(chan chron.TimeExact, s.bsize)
 	if s.offsetFn != nil {
 		if s.begin.After(s.end.Time) {
@@ -399,7 +441,7 @@ func (s *sequence) fixedIncs(ctx context.Context) <-chan chron.TimeExact {
 }
 
 // One of the six possible goroutines starts
-func (s *sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
+func (s *Sequence) variableIncs(ctx context.Context) <-chan chron.TimeExact {
 	out := make(chan chron.TimeExact, s.bsize)
 	if s.offsetFn != nil {
 		if s.begin.After(s.end.Time) {
