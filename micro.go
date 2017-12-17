@@ -51,13 +51,13 @@ func (m Micro) Contains(t TimeExact) bool {
 }
 
 func (m Micro) Before() TimeExact {
-	return m.AsTimeExact().Decrement(length.Nano)
+	return m.AsTimeExact().Decrement(duration.Nano)
 }
 
 func (m Micro) After() TimeExact {
-	return m.AsTimeExact().Increment(length.Micro)
+	return m.AsTimeExact().Increment(duration.Micro)
 }
 
 func (m Micro) Len() Length {
-	return length.Micro
+	return duration.Micro
 }

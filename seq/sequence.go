@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/dustinevan/chron"
-	"github.com/dustinevan/chron/length"
+	"github.com/dustinevan/chron/dura"
 )
 
 type SeqOption func(*Sequence) error
@@ -35,7 +35,7 @@ type Sequence struct {
 	// -- Increment Fields -- Note: Panics if one of these is not set.
 
 	// constantIncrement is the length added to get the next seq time.
-	increment chron.Length
+	increment dura.Duration
 	repeats   int
 
 	// variableIncrementFn takes precedence over constantIncrement; The
@@ -47,11 +47,11 @@ type Sequence struct {
 	// if set, this length is added to the next seq time. Offset is not
 	// used to calculate the next seq time. e.g. seq bases the next
 	// date off curr not curr + offset.
-	offset chron.Length
+	offset dura.Duration
 	// variableOffset takes precedence over constantOffset. A good example
 	// use case is random offsets the spread the sequence times across an
 	// hour.
-	offsetFn func(chron.Time) chron.Length
+	offsetFn func(chron.Time) dura.Duration
 
 	// -- Channel Buffering --
 	// Defaults to 1; set to 0 for unbuffered channels
@@ -99,10 +99,10 @@ func End(end chron.Time) SeqOption {
 }
 
 func InclusiveEnd(end chron.Time) SeqOption {
-	return End(end.Increment(length.Nano))
+	return End(end.Increment(dura.Nano))
 }
 
-func ForPeriod(len chron.Length) SeqOption {
+func ForPeriod(len dura.Duration) SeqOption {
 	return func(s *Sequence) error {
 		if s.negativeTime == false {
 			s.end = s.begin.Increment(len)
@@ -113,7 +113,7 @@ func ForPeriod(len chron.Length) SeqOption {
 	}
 }
 
-func IncrementBy(len chron.Length) SeqOption {
+func IncrementBy(len dura.Duration) SeqOption {
 	return func(s *Sequence) error {
 		if s.incrementFn != nil {
 			return fmt.Errorf("IncrementBy called when a dynamic increment function is already set")
@@ -130,7 +130,7 @@ func IncrementFn(f func(chron.TimeExact) chron.TimeExact) SeqOption {
 	}
 }
 
-func OffsetBy(len chron.Length) SeqOption {
+func OffsetBy(len dura.Duration) SeqOption {
 	return func(s *Sequence) error {
 		if s.offsetFn != nil {
 			return fmt.Errorf("OffsetBy called when a dynamic offset function is already set")
@@ -140,7 +140,7 @@ func OffsetBy(len chron.Length) SeqOption {
 	}
 }
 
-func OffsetFn(f func(chron.Time) chron.Length) SeqOption {
+func OffsetFn(f func(chron.Time) dura.Duration) SeqOption {
 	return func(s *Sequence) error {
 		s.offsetFn = f
 		return nil

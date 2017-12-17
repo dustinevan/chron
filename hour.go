@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/dustinevan/chron/length"
+	"github.com/golang/protobuf/ptypes/duration"
 )
 
 type Hour struct {
@@ -51,13 +52,13 @@ func (h Hour) Contains(t TimeExact) bool {
 }
 
 func (h Hour) Before() TimeExact {
-	return h.AsTimeExact().Decrement(length.Nano)
+	return h.AsTimeExact().Decrement(duration.Nano)
 }
 
 func (h Hour) After() TimeExact {
-	return h.AsTimeExact().Increment(length.Hour)
+	return h.AsTimeExact().Increment(duration.Hour)
 }
 
 func (h Hour) Len() Length {
-	return length.Hour
+	return duration.Hour
 }

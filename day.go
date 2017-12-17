@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/dustinevan/chron/length"
+	"github.com/golang/protobuf/ptypes/duration"
+	"github.com/dustinevan/chron/dura"
 )
 
 type Day struct {
@@ -33,12 +35,12 @@ func (d Day) AsMicro() Micro         { return MicroOf(d.Time) }
 func (d Day) AsTimeExact() TimeExact { return TimeOf(d.Time) }
 func (d Day) AsTime() time.Time      { return d.Time }
 
-func (d Day) Increment(l Length) TimeExact {
-	return TimeExact{d.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
+func (d Day) Increment(du dura.Duration) TimeExact {
+	return TimeExact{d.AddDate(du.Years(), du.Months(), du.Days()).Add(du.Duration())}
 }
 
-func (d Day) Decrement(l Length) TimeExact {
-	return TimeExact{d.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
+func (d Day) Decrement(du dura.Duration) TimeExact {
+	return TimeExact{d.AddDate(-1*du.Years(), -1*du.Months(), -1*du.Days()).Add(-1 * du.Duration())}
 }
 
 func (d Day) AddN(n int) Day {
@@ -51,13 +53,13 @@ func (d Day) Contains(t TimeExact) bool {
 }
 
 func (d Day) Before() TimeExact {
-	return d.AsTimeExact().Decrement(length.Nano)
+	return d.AsTimeExact().Decrement(dura.Nano)
 }
 
 func (d Day) After() TimeExact {
-	return d.AsTimeExact().Increment(length.Day)
+	return d.AsTimeExact().Increment(duration.Day)
 }
 
 func (d Day) Len() Length {
-	return length.Day
+	return duration.Day
 }

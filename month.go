@@ -51,15 +51,15 @@ func (m Month) Contains(t TimeExact) bool {
 }
 
 func (m Month) Before() TimeExact {
-	return m.AsTimeExact().Decrement(length.Nano)
+	return m.AsTimeExact().Decrement(duration.Nano)
 }
 
 func (m Month) After() TimeExact {
-	return m.AsTimeExact().Increment(length.Month)
+	return m.AsTimeExact().Increment(duration.Month)
 }
 
 func (m Month) Len() Length {
-	return length.Month
+	return duration.Month
 }
 
 /*
