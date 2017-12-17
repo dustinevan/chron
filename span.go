@@ -7,42 +7,52 @@ import (
 )
 
 type Span interface {
-	Contains(Time) bool
+	Start() TimeExact
+	End() TimeExact
 	Before(Time) bool
 	After(Time) bool
-	Duration() dura.Duration
+	Contains(Time) bool
+	Duration() dura.Time
 }
 
-type Period struct {
-	start Time
-	end   Time
-	d     dura.Duration
+type TimeSpan struct {
+	start TimeExact
+	end   TimeExact
+	d     dura.Time
 }
 
-func NewSpan(start Time, d dura.Duration) *Timespan {
-	return &Timespan{
+func NewTimeSpan(start TimeExact, d dura.Time) *TimeSpan {
+	return &TimeSpan{
 		start: start,
-		end:   start.Increment(len),
+		end:   start.Increment(d).Decrement(dura.Nano),
 		d:     d,
 	}
 }
 
-func (s *Timespan) Contains(t Time) bool {
+func (s TimeSpan) Contains(t Span) bool {
 	return !s.Before(t) && !s.After(t)
 }
 
-func (s *Timespan) Before(t Time) bool {
-	return s.end.AsTime().Before(t.AsTime())
+func (s TimeSpan) Before(t Span) bool {
+	return s.End().AsTime().Before(t.Start().AsTime())
 }
 
-func (s *Timespan) After(t Time) bool {
-	return s.start.AsTime().After(t.AsTime())
+func (s TimeSpan) After(t Span) bool {
+	return s.Start().AsTime().After(t.End().AsTime())
 }
 
-func (s *Timespan) Duration() dura.Duration {
+func (s TimeSpan) Duration() dura.Time {
 	return s.d
 }
 
-func (s *Timespan) String() string {
+func (s TimeSpan) Start() TimeExact {
+	return s.start
+}
+
+func (s TimeSpan) End() TimeExact {
+	return s.end
+}
+
+func (s TimeSpan) String() string {
 	return fmt.Sprintf("start:%s, end:%s, len:%s", s.start, s.end, s.d)
 }

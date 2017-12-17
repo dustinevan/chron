@@ -2,6 +2,8 @@ package chron
 
 import (
 	"time"
+
+	"github.com/dustinevan/chron/dura"
 )
 
 type Time interface {
@@ -16,8 +18,8 @@ type Time interface {
 	AsTimeExact() TimeExact
 	AsTime() time.Time
 
-	Increment(length Length) TimeExact
-	Decrement(length Length) TimeExact
+	Increment(dura.Time) TimeExact
+	Decrement(dura.Time) TimeExact
 }
 
 type TimeExact struct {
@@ -47,12 +49,12 @@ func (t TimeExact) AsMicro() Micro         { return MicroOf(t.Time) }
 func (t TimeExact) AsTimeExact() TimeExact { return TimeOf(t.Time) }
 func (t TimeExact) AsTime() time.Time      { return t.Time }
 
-func (t TimeExact) Increment(l Length) TimeExact {
-	return TimeExact{t.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
+func (t TimeExact) Increment(d dura.Time) TimeExact {
+	return TimeExact{t.AddDate(d.Years(), d.Months(), d.Days()).Add(d.Duration())}
 }
 
-func (t TimeExact) Decrement(l Length) TimeExact {
-	return TimeExact{t.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
+func (t TimeExact) Decrement(d dura.Time) TimeExact {
+	return TimeExact{t.AddDate(-1*d.Years(), -1*d.Months(), -1*d.Days()).Add(-1 * d.Duration())}
 }
 
 func ZeroValue() TimeExact {

@@ -3,8 +3,7 @@ package chron
 import (
 	"time"
 
-	"github.com/dustinevan/chron/length"
-	"github.com/golang/protobuf/ptypes/duration"
+	"github.com/dustinevan/chron/dura"
 )
 
 type Hour struct {
@@ -34,11 +33,11 @@ func (h Hour) AsMicro() Micro         { return MicroOf(h.Time) }
 func (h Hour) AsTimeExact() TimeExact { return TimeOf(h.Time) }
 func (h Hour) AsTime() time.Time      { return h.Time }
 
-func (h Hour) Increment(l Length) TimeExact {
+func (h Hour) Increment(l dura.Time) TimeExact {
 	return TimeExact{h.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (h Hour) Decrement(l Length) TimeExact {
+func (h Hour) Decrement(l dura.Time) TimeExact {
 	return TimeExact{h.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
@@ -46,19 +45,19 @@ func (h Hour) AddN(n int) Hour {
 	return Hour{h.Add(time.Duration(int(time.Hour) * n))}
 }
 
-// Period Implementation
+/*Period Implementation
 func (h Hour) Contains(t TimeExact) bool {
 	return t.Hour() == h.Hour()
 }
 
 func (h Hour) Before() TimeExact {
-	return h.AsTimeExact().Decrement(duration.Nano)
+	return h.AsTimeExact().Decrement(dura.Nano)
 }
 
 func (h Hour) After() TimeExact {
-	return h.AsTimeExact().Increment(duration.Hour)
+	return h.AsTimeExact().Increment(dura.Hour)
 }
 
-func (h Hour) Len() Length {
-	return duration.Hour
-}
+func (h Hour) Len() dura.Time {
+	return dura.Hour
+}*/

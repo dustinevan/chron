@@ -3,7 +3,7 @@ package chron
 import (
 	"time"
 
-	"github.com/dustinevan/chron/length"
+	"github.com/dustinevan/chron/dura"
 )
 
 type Month struct {
@@ -33,11 +33,11 @@ func (m Month) AsMicro() Micro         { return MicroOf(m.Time) }
 func (m Month) AsTimeExact() TimeExact { return TimeOf(m.Time) }
 func (m Month) AsTime() time.Time      { return m.Time }
 
-func (m Month) Increment(l Length) TimeExact {
+func (m Month) Increment(l dura.Time) TimeExact {
 	return TimeExact{m.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (m Month) Decrement(l Length) TimeExact {
+func (m Month) Decrement(l dura.Time) TimeExact {
 	return TimeExact{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
@@ -45,22 +45,22 @@ func (m Month) AddN(n int) Month {
 	return Month{m.AddDate(0, n, 0)}
 }
 
-// Period Implementation
+/* Period Implementation
 func (m Month) Contains(t TimeExact) bool {
 	return t.Month() == m.Month()
 }
 
 func (m Month) Before() TimeExact {
-	return m.AsTimeExact().Decrement(duration.Nano)
+	return m.AsTimeExact().Decrement(dura.Nano)
 }
 
 func (m Month) After() TimeExact {
-	return m.AsTimeExact().Increment(duration.Month)
+	return m.AsTimeExact().Increment(dura.Month)
 }
 
-func (m Month) Len() Length {
-	return duration.Month
-}
+func (m Month) Len() dura.Time {
+	return dura.Month
+}*/
 
 /*
 func (m Month) AddMonth(m1 int) Month {

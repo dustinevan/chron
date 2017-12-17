@@ -3,7 +3,7 @@ package chron
 import (
 	"time"
 
-	"github.com/dustinevan/chron/length"
+	"github.com/dustinevan/chron/dura"
 )
 
 type Second struct {
@@ -33,11 +33,11 @@ func (s Second) AsMicro() Micro         { return MicroOf(s.Time) }
 func (s Second) AsTimeExact() TimeExact { return TimeOf(s.Time) }
 func (s Second) AsTime() time.Time      { return s.Time }
 
-func (s Second) Increment(l Length) TimeExact {
+func (s Second) Increment(l dura.Time) TimeExact {
 	return TimeExact{s.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (s Second) Decrement(l Length) TimeExact {
+func (s Second) Decrement(l dura.Time) TimeExact {
 	return TimeExact{s.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
@@ -45,19 +45,19 @@ func (s Second) AddN(n int) Second {
 	return Second{s.Add(time.Duration(int(time.Second) * n))}
 }
 
-// Period Implementation
+/* Period Implementation
 func (s Second) Contains(t TimeExact) bool {
 	return t.Second() == s.Second()
 }
 
 func (s Second) Before() TimeExact {
-	return s.AsTimeExact().Decrement(duration.Nano)
+	return s.AsTimeExact().Decrement(dura.Nano)
 }
 
 func (s Second) After() TimeExact {
-	return s.AsTimeExact().Increment(duration.Second)
+	return s.AsTimeExact().Increment(dura.Second)
 }
 
-func (s Second) Len() Length {
-	return duration.Second
-}
+func (s Second) Len() dura.Time {
+	return dura.Second
+}*/

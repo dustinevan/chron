@@ -35,7 +35,7 @@ type Sequence struct {
 	// -- Increment Fields -- Note: Panics if one of these is not set.
 
 	// constantIncrement is the length added to get the next seq time.
-	increment dura.Duration
+	increment dura.Time
 	repeats   int
 
 	// variableIncrementFn takes precedence over constantIncrement; The
@@ -47,11 +47,11 @@ type Sequence struct {
 	// if set, this length is added to the next seq time. Offset is not
 	// used to calculate the next seq time. e.g. seq bases the next
 	// date off curr not curr + offset.
-	offset dura.Duration
+	offset dura.Time
 	// variableOffset takes precedence over constantOffset. A good example
 	// use case is random offsets the spread the sequence times across an
 	// hour.
-	offsetFn func(chron.Time) dura.Duration
+	offsetFn func(chron.Time) dura.Time
 
 	// -- Channel Buffering --
 	// Defaults to 1; set to 0 for unbuffered channels
@@ -102,7 +102,7 @@ func InclusiveEnd(end chron.Time) SeqOption {
 	return End(end.Increment(dura.Nano))
 }
 
-func ForPeriod(len dura.Duration) SeqOption {
+func ForPeriod(len dura.Time) SeqOption {
 	return func(s *Sequence) error {
 		if s.negativeTime == false {
 			s.end = s.begin.Increment(len)
@@ -113,7 +113,7 @@ func ForPeriod(len dura.Duration) SeqOption {
 	}
 }
 
-func IncrementBy(len dura.Duration) SeqOption {
+func IncrementBy(len dura.Time) SeqOption {
 	return func(s *Sequence) error {
 		if s.incrementFn != nil {
 			return fmt.Errorf("IncrementBy called when a dynamic increment function is already set")
@@ -130,7 +130,7 @@ func IncrementFn(f func(chron.TimeExact) chron.TimeExact) SeqOption {
 	}
 }
 
-func OffsetBy(len dura.Duration) SeqOption {
+func OffsetBy(len dura.Time) SeqOption {
 	return func(s *Sequence) error {
 		if s.offsetFn != nil {
 			return fmt.Errorf("OffsetBy called when a dynamic offset function is already set")
@@ -140,7 +140,7 @@ func OffsetBy(len dura.Duration) SeqOption {
 	}
 }
 
-func OffsetFn(f func(chron.Time) dura.Duration) SeqOption {
+func OffsetFn(f func(chron.Time) dura.Time) SeqOption {
 	return func(s *Sequence) error {
 		s.offsetFn = f
 		return nil
@@ -161,9 +161,9 @@ func ChanSize(i int) SeqOption {
 	}
 }
 
-type stop func()
+type cancel func()
 
-func (s *Sequence) TimeChan() (<-chan time.Time, stop) {
+func (s *Sequence) TimeChan() (<-chan time.Time, cancel) {
 	in, canc := s.start()
 	out := make(chan time.Time, s.bsize)
 	stop := func() {
@@ -181,7 +181,7 @@ func (s *Sequence) TimeChan() (<-chan time.Time, stop) {
 	return out, stop
 }
 
-func (s *Sequence) ExactTimeChan() (<-chan chron.TimeExact, stop) {
+func (s *Sequence) ExactTimeChan() (<-chan chron.TimeExact, cancel) {
 	in, canc := s.start()
 	out := make(chan chron.TimeExact, s.bsize)
 	stop := func() {
@@ -199,7 +199,7 @@ func (s *Sequence) ExactTimeChan() (<-chan chron.TimeExact, stop) {
 	return out, stop
 }
 
-func (s *Sequence) YearChan() (<-chan chron.Year, stop) {
+func (s *Sequence) YearChan() (<-chan chron.Year, cancel) {
 	in, canc := s.start()
 	out := make(chan chron.Year, s.bsize)
 	stop := func() {
@@ -217,7 +217,7 @@ func (s *Sequence) YearChan() (<-chan chron.Year, stop) {
 	return out, stop
 }
 
-func (s *Sequence) MonthChan() (<-chan chron.Month, stop) {
+func (s *Sequence) MonthChan() (<-chan chron.Month, cancel) {
 	in, canc := s.start()
 	out := make(chan chron.Month, s.bsize)
 	stop := func() {
@@ -235,7 +235,7 @@ func (s *Sequence) MonthChan() (<-chan chron.Month, stop) {
 	return out, stop
 }
 
-func (s *Sequence) DayChan() (<-chan chron.Day, stop) {
+func (s *Sequence) DayChan() (<-chan chron.Day, cancel) {
 	in, canc := s.start()
 	out := make(chan chron.Day, s.bsize)
 	stop := func() {
@@ -253,7 +253,7 @@ func (s *Sequence) DayChan() (<-chan chron.Day, stop) {
 	return out, stop
 }
 
-func (s *Sequence) HourChan() (<-chan chron.Hour, stop) {
+func (s *Sequence) HourChan() (<-chan chron.Hour, cancel) {
 	in, canc := s.start()
 	out := make(chan chron.Hour, s.bsize)
 	stop := func() {
@@ -271,7 +271,7 @@ func (s *Sequence) HourChan() (<-chan chron.Hour, stop) {
 	return out, stop
 }
 
-func (s *Sequence) MinuteChan() (<-chan chron.Minute, stop) {
+func (s *Sequence) MinuteChan() (<-chan chron.Minute, cancel) {
 	in, canc := s.start()
 	out := make(chan chron.Minute, s.bsize)
 	stop := func() {
@@ -289,7 +289,7 @@ func (s *Sequence) MinuteChan() (<-chan chron.Minute, stop) {
 	return out, stop
 }
 
-func (s *Sequence) SecondChan() (<-chan chron.Second, stop) {
+func (s *Sequence) SecondChan() (<-chan chron.Second, cancel) {
 	in, canc := s.start()
 	out := make(chan chron.Second, s.bsize)
 	stop := func() {

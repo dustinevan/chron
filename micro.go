@@ -3,7 +3,7 @@ package chron
 import (
 	"time"
 
-	"github.com/dustinevan/chron/length"
+	"github.com/dustinevan/chron/dura"
 )
 
 type Micro struct {
@@ -33,11 +33,11 @@ func (m Micro) AsMicro() Micro         { return MicroOf(m.Time) }
 func (m Micro) AsTimeExact() TimeExact { return TimeOf(m.Time) }
 func (m Micro) AsTime() time.Time      { return m.Time }
 
-func (m Micro) Increment(l Length) TimeExact {
+func (m Micro) Increment(l dura.Time) TimeExact {
 	return TimeExact{m.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (m Micro) Decrement(l Length) TimeExact {
+func (m Micro) Decrement(l dura.Time) TimeExact {
 	return TimeExact{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
@@ -45,19 +45,19 @@ func (m Micro) AddN(n int) Micro {
 	return Micro{m.Add(time.Duration(int(time.Microsecond) * n))}
 }
 
-// Period Implementation
+/* Period Implementation
 func (m Micro) Contains(t TimeExact) bool {
 	return (t.Nanosecond()/1000)*1000 == t.AsMilli().Nanosecond()
 }
 
 func (m Micro) Before() TimeExact {
-	return m.AsTimeExact().Decrement(duration.Nano)
+	return m.AsTimeExact().Decrement(dura.Nano)
 }
 
 func (m Micro) After() TimeExact {
-	return m.AsTimeExact().Increment(duration.Micro)
+	return m.AsTimeExact().Increment(dura.Micro)
 }
 
-func (m Micro) Len() Length {
-	return duration.Micro
-}
+func (m Micro) Len() dura.Time {
+	return dura.Micro
+}*/

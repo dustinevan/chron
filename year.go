@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/dustinevan/chron/dura"
-	"github.com/golang/protobuf/ptypes/duration"
 )
 
 type Year struct {
@@ -34,11 +33,11 @@ func (y Year) AsMicro() Micro         { return MicroOf(y.Time) }
 func (y Year) AsTimeExact() TimeExact { return TimeOf(y.Time) }
 func (y Year) AsTime() time.Time      { return y.Time }
 
-func (y Year) Increment(i Length) TimeExact {
+func (y Year) Increment(i dura.Time) TimeExact {
 	return TimeExact{y.AddDate(i.Years(), i.Months(), i.Days()).Add(i.Duration())}
 }
 
-func (y Year) Decrement(i Length) TimeExact {
+func (y Year) Decrement(i dura.Time) TimeExact {
 	return TimeExact{y.AddDate(-1*i.Years(), -1*i.Months(), -1*i.Days()).Add(-1 * i.Duration())}
 }
 
@@ -46,21 +45,21 @@ func (y Year) AddN(n int) Year {
 	return Year{y.AddDate(n, 0, 0)}
 }
 
-// Period Implementation
+/* Period Implementation
 func (y Year) Contains(t TimeExact) bool {
 	return t.Year() == y.Year()
 }
 
 func (y Year) Before() TimeExact {
-	return y.AsTimeExact().Decrement(duration.Nano)
+	return y.AsTimeExact().Decrement(dura.Nano)
 }
 
 func (y Year) After() TimeExact {
-	return y.AsTimeExact().Increment(duration.Year)
+	return y.AsTimeExact().Increment(dura.Year)
 }
 
-func (y Year) Len() Length {
-	return duration.Year
+func (y Year) Len() dura.Time {
+	return dura.Year
 }
 
 /*func (y Year) AddYear(n int) Year {
