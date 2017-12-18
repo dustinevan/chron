@@ -45,19 +45,27 @@ func (m Minute) AddN(n int) Minute {
 	return Minute{m.Add(time.Duration(int(time.Minute) * n))}
 }
 
-/* Period Implementation
-func (m Minute) Contains(t TimeExact) bool {
-	return t.Minute() == m.Minute()
+// span.Time implementation
+func (m Minute) Start() Time {
+	return m.AsTimeExact()
 }
 
-func (m Minute) Before() TimeExact {
-	return m.AsTimeExact().Decrement(dura.Nano)
+func (m Minute) End() Time {
+	return m.AddN(1).Decrement(dura.Nano)
 }
 
-func (m Minute) After() TimeExact {
-	return m.AsTimeExact().Increment(dura.Minute)
+func (m Minute) Contains(t Span) bool {
+	return !m.Before(t) && !m.After(t)
 }
 
-func (m Minute) Len() dura.Time {
+func (m Minute) Before(t Span) bool {
+	return m.End().AsTime().Before(t.Start().AsTime())
+}
+
+func (m Minute) After(t Span) bool {
+	return m.Start().AsTime().After(t.End().AsTime())
+}
+
+func (m Minute) Duration() dura.Time {
 	return dura.Minute
-}*/
+}

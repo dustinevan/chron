@@ -45,22 +45,30 @@ func (m Month) AddN(n int) Month {
 	return Month{m.AddDate(0, n, 0)}
 }
 
-/* Period Implementation
-func (m Month) Contains(t TimeExact) bool {
-	return t.Month() == m.Month()
+// span.Time implementation
+func (m Month) Start() Time {
+	return m.AsTimeExact()
 }
 
-func (m Month) Before() TimeExact {
-	return m.AsTimeExact().Decrement(dura.Nano)
+func (m Month) End() Time {
+	return m.AddN(1).Decrement(dura.Nano)
 }
 
-func (m Month) After() TimeExact {
-	return m.AsTimeExact().Increment(dura.Month)
+func (m Month) Contains(t Span) bool {
+	return !m.Before(t) && !m.After(t)
 }
 
-func (m Month) Len() dura.Time {
+func (m Month) Before(t Span) bool {
+	return m.End().AsTime().Before(t.Start().AsTime())
+}
+
+func (m Month) After(t Span) bool {
+	return m.Start().AsTime().After(t.End().AsTime())
+}
+
+func (m Month) Duration() dura.Time {
 	return dura.Month
-}*/
+}
 
 /*
 func (m Month) AddMonth(m1 int) Month {

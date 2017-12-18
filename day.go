@@ -53,21 +53,21 @@ func (d Day) Start() Time {
 }
 
 func (d Day) End() Time {
-	return d.AsTimeExact()
+	return d.AddN(1).Decrement(dura.Nano)
 }
 
 func (d Day) Contains(t Span) bool {
-	return t.Start().Day() == d.Day()
+	return !d.Before(t) && !d.After(t)
 }
 
 func (d Day) Before(t Span) bool {
-	return false
+	return d.End().AsTime().Before(t.Start().AsTime())
 }
 
 func (d Day) After(t Span) bool {
-	return )
+	return d.Start().AsTime().After(t.End().AsTime())
 }
 
 func (d Day) Duration() dura.Time {
 	return dura.Day
-}*/
+}

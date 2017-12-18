@@ -57,6 +57,32 @@ func (t TimeExact) Decrement(d dura.Time) TimeExact {
 	return TimeExact{t.AddDate(-1*d.Years(), -1*d.Months(), -1*d.Days()).Add(-1 * d.Duration())}
 }
 
+// span.Time implementation
+func (t TimeExact) Start() Time {
+	return t
+}
+
+func (t TimeExact) End() Time {
+	return t
+}
+
+func (t TimeExact) Contains(s Span) bool {
+	return !t.Before(s) && !t.After(s)
+}
+
+func (t TimeExact) Before(s Span) bool {
+	return t.End().AsTime().Before(s.Start().AsTime())
+}
+
+func (t TimeExact) After(s Span) bool {
+	return t.Start().AsTime().After(s.End().AsTime())
+}
+
+func (t TimeExact) Duration() dura.Time {
+	return dura.Micro
+}
+
+
 func ZeroValue() TimeExact {
 	return NewYear(0).AsTimeExact()
 }

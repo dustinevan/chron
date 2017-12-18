@@ -45,19 +45,27 @@ func (m Milli) AddN(n int) Milli {
 	return Milli{m.Add(time.Duration(int(time.Millisecond) * n))}
 }
 
-/* Period Implementation
-func (m Milli) Contains(t TimeExact) bool {
-	return (t.Nanosecond()/1000000)*1000000 == t.AsMilli().Nanosecond()
+// span.Time implementation
+func (m Milli) Start() Time {
+	return m.AsTimeExact()
 }
 
-func (m Milli) Before() TimeExact {
-	return m.AsTimeExact().Decrement(dura.Nano)
+func (m Milli) End() Time {
+	return m.AddN(1).Decrement(dura.Nano)
 }
 
-func (m Milli) After() TimeExact {
-	return m.AsTimeExact().Increment(dura.Milli)
+func (m Milli) Contains(t Span) bool {
+	return !m.Before(t) && !m.After(t)
 }
 
-func (m Milli) Len() dura.Time {
+func (m Milli) Before(t Span) bool {
+	return m.End().AsTime().Before(t.Start().AsTime())
+}
+
+func (m Milli) After(t Span) bool {
+	return m.Start().AsTime().After(t.End().AsTime())
+}
+
+func (m Milli) Duration() dura.Time {
 	return dura.Milli
-}*/
+}

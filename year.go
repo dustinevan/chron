@@ -45,22 +45,31 @@ func (y Year) AddN(n int) Year {
 	return Year{y.AddDate(n, 0, 0)}
 }
 
-/* Period Implementation
-func (y Year) Contains(t TimeExact) bool {
-	return t.Year() == y.Year()
+// span.Time implementation
+func (y Year) Start() Time {
+	return y.AsTimeExact()
 }
 
-func (y Year) Before() TimeExact {
-	return y.AsTimeExact().Decrement(dura.Nano)
+func (y Year) End() Time {
+	return y.AddN(1).Decrement(dura.Nano)
 }
 
-func (y Year) After() TimeExact {
-	return y.AsTimeExact().Increment(dura.Year)
+func (y Year) Contains(t Span) bool {
+	return !y.Before(t) && !y.After(t)
 }
 
-func (y Year) Len() dura.Time {
+func (y Year) Before(t Span) bool {
+	return y.End().AsTime().Before(t.Start().AsTime())
+}
+
+func (y Year) After(t Span) bool {
+	return y.Start().AsTime().After(t.End().AsTime())
+}
+
+func (y Year) Duration() dura.Time {
 	return dura.Year
 }
+
 
 /*func (y Year) AddYear(n int) Year {
 	return NewYear(y.Year() + n)
