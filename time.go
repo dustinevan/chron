@@ -46,7 +46,7 @@ func (t TimeExact) AsMinute() Minute       { return MinuteOf(t.Time) }
 func (t TimeExact) AsSecond() Second       { return SecondOf(t.Time) }
 func (t TimeExact) AsMilli() Milli         { return MilliOf(t.Time) }
 func (t TimeExact) AsMicro() Micro         { return MicroOf(t.Time) }
-func (t TimeExact) AsTimeExact() TimeExact { return TimeOf(t.Time) }
+func (t TimeExact) AsTimeExact() TimeExact { return t }
 func (t TimeExact) AsTime() time.Time      { return t.Time }
 
 func (t TimeExact) Increment(d dura.Time) TimeExact {
@@ -55,6 +55,11 @@ func (t TimeExact) Increment(d dura.Time) TimeExact {
 
 func (t TimeExact) Decrement(d dura.Time) TimeExact {
 	return TimeExact{t.AddDate(-1*d.Years(), -1*d.Months(), -1*d.Days()).Add(-1 * d.Duration())}
+}
+
+// AddN adds n Nanoseconds to the TimeExact
+func (t TimeExact) AddN(n int) TimeExact {
+	return TimeOf(t.AsTime().Add(time.Duration(n)))
 }
 
 // span.Time implementation
@@ -82,7 +87,6 @@ func (t TimeExact) Duration() dura.Time {
 	return dura.Micro
 }
 
-
 func ZeroValue() TimeExact {
 	return NewYear(0).AsTimeExact()
 }
@@ -99,4 +103,40 @@ func MaxValue() TimeExact {
 
 func MinValue() TimeExact {
 	return TimeOf(min)
+}
+
+func (t TimeExact) AddYears(y int) TimeExact {
+	return t.Increment(dura.Years(y))
+}
+
+func (t TimeExact) AddMonths(m int) TimeExact {
+	return t.Increment(dura.Months(m))
+}
+
+func (t TimeExact) AddDays(d int) TimeExact {
+	return t.Increment(dura.Days(d))
+}
+
+func (t TimeExact) AddHours(h int) TimeExact {
+	return t.Increment(dura.Hours(h))
+}
+
+func (t TimeExact) AddMinutes(m int) TimeExact {
+	return t.Increment(dura.Mins(m))
+}
+
+func (t TimeExact) AddSeconds(s int) TimeExact {
+	return t.Increment(dura.Secs(s))
+}
+
+func (t TimeExact) AddMillis(m int) TimeExact {
+	return t.Increment(dura.Millis(m))
+}
+
+func (t TimeExact) AddMicro(m int) TimeExact {
+	return t.Increment(dura.Micros(m))
+}
+
+func (t TimeExact) AddNano(n int) TimeExact {
+	return t.AddN(n)
 }

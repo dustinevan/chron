@@ -22,7 +22,7 @@ func YearOf(time time.Time) Year {
 	return NewYear(time.Year())
 }
 
-func (y Year) AsYear() Year           { return YearOf(y.Time) }
+func (y Year) AsYear() Year           { return y }
 func (y Year) AsMonth() Month         { return MonthOf(y.Time) }
 func (y Year) AsDay() Day             { return DayOf(y.Time) }
 func (y Year) AsHour() Hour           { return HourOf(y.Time) }
@@ -70,35 +70,38 @@ func (y Year) Duration() dura.Time {
 	return dura.Year
 }
 
-
-/*func (y Year) AddYear(n int) Year {
-	return NewYear(y.Year() + n)
+func (y Year) AddYears(ys int) Year {
+	return y.AddN(ys)
 }
 
-func (y Year) AddMonth(m int) Month {
-	return y.AsMonth().AddMonth(m)
+func (y Year) AddMonths(m int) Month {
+	return y.AsMonth().AddN(m)
 }
 
-func (y Year) AddDay(d int) Day {
-	return NewDay(y.Year(), 1, d)
+func (y Year) AddDays(d int) Day {
+	return y.AsDay().AddN(d)
 }
 
-func (y Year) AddHour(h int) Hour {
-	return NewHour(y.Year(), 1, 1, h)
+func (y Year) AddHours(h int) Hour {
+	return y.AsHour().AddN(h)
 }
 
-func (y Year) AddMinute(m int) Minute {
+func (y Year) AddMinutes(m int) Minute {
+	return y.AsMinute().AddN(m)
 }
 
-func (y Year) AddSecond(s int) Second {
-	return NewSecond(y.Year(), m, d)
+func (y Year) AddSeconds(s int) Second {
+	return y.AsSecond().AddN(s)
 }
 
-func (y Year) AddMilli(m int) Milli {
-	return NewMilli(y.Year)
+func (y Year) AddMillis(m int) Milli {
+	return y.AsMilli().AddN(m)
 }
 
 func (y Year) AddMicro(m int) Micro {
-	return NewMicro(y.Year)
+	return y.AsMicro().AddN(m)
 }
-*/
+
+func (y Year) AddNano(n int) TimeExact {
+	return y.AsTimeExact().AddN(n)
+}

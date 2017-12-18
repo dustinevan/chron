@@ -26,8 +26,8 @@ func DayOf(time time.Time) Day {
 // chron.Time implementation
 func (d Day) AsYear() Year           { return YearOf(d.Time) }
 func (d Day) AsMonth() Month         { return MonthOf(d.Time) }
+func (d Day) AsDay() Day             { return d }
 func (d Day) AsHour() Hour           { return HourOf(d.Time) }
-func (d Day) AsDay() Day             { return DayOf(d.Time) }
 func (d Day) AsMinute() Minute       { return MinuteOf(d.Time) }
 func (d Day) AsSecond() Second       { return SecondOf(d.Time) }
 func (d Day) AsMilli() Milli         { return MilliOf(d.Time) }
@@ -70,4 +70,41 @@ func (d Day) After(t Span) bool {
 
 func (d Day) Duration() dura.Time {
 	return dura.Day
+}
+
+func (d Day) AddYears(y int) Day {
+	return d.Increment(dura.Years(y)).AsDay()
+}
+
+// needs a global setting. i.e. july 31 - 1 month
+func (d Day) AddMonths(m int) Day {
+	return d.Increment(dura.Months(m)).AsDay()
+}
+
+func (d Day) AddDays(ds int) Day {
+	return d.AddN(ds)
+}
+
+func (d Day) AddHours(h int) Hour {
+	return d.AsHour().AddN(h)
+}
+
+func (d Day) AddMinutes(m int) Minute {
+	return d.AsMinute().AddN(m)
+}
+
+func (d Day) AddSeconds(s int) Second {
+	return d.AsSecond().AddN(s)
+}
+
+func (d Day) AddMillis(m int) Milli {
+	return d.AsMilli().AddN(m)
+}
+
+func (d Day) AddMicro(m int) Micro {
+	return d.AsMicro().AddN(m)
+}
+
+func (d Day) AddNano(n int) TimeExact {
+	return d.AsTimeExact().AddN(n)
 }

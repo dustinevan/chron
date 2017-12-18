@@ -27,7 +27,7 @@ func (s Second) AsMonth() Month         { return MonthOf(s.Time) }
 func (s Second) AsDay() Day             { return DayOf(s.Time) }
 func (s Second) AsHour() Hour           { return HourOf(s.Time) }
 func (s Second) AsMinute() Minute       { return MinuteOf(s.Time) }
-func (s Second) AsSecond() Second       { return SecondOf(s.Time) }
+func (s Second) AsSecond() Second       { return s }
 func (s Second) AsMilli() Milli         { return MilliOf(s.Time) }
 func (s Second) AsMicro() Micro         { return MicroOf(s.Time) }
 func (s Second) AsTimeExact() TimeExact { return TimeOf(s.Time) }
@@ -68,4 +68,40 @@ func (s Second) After(t Span) bool {
 
 func (s Second) Duration() dura.Time {
 	return dura.Second
+}
+
+func (s Second) AddYears(y int) Second {
+	return s.Increment(dura.Years(y)).AsSecond()
+}
+
+func (s Second) AddMonths(m int) Second {
+	return s.Increment(dura.Months(m)).AsSecond()
+}
+
+func (s Second) AddDays(d int) Second {
+	return s.Increment(dura.Days(d)).AsSecond()
+}
+
+func (s Second) AddHours(h int) Second {
+	return s.Increment(dura.Hours(h)).AsSecond()
+}
+
+func (s Second) AddMinutes(m int) Second {
+	return s.Increment(dura.Mins(m)).AsSecond()
+}
+
+func (s Second) AddSeconds(secs int) Second {
+	return s.AddN(secs)
+}
+
+func (s Second) AddMillis(m int) Milli {
+	return s.AsMilli().AddN(m)
+}
+
+func (s Second) AddMicro(m int) Micro {
+	return s.AsMicro().AddN(m)
+}
+
+func (s Second) AddNano(n int) TimeExact {
+	return s.AsTimeExact().AddN(n)
 }
