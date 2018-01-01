@@ -1,25 +1,23 @@
 package chron
 
 import (
-	"sync"
 	"github.com/dustinevan/chron/dura"
 )
 
 // Filter
 type FilterFunc func(Time) (filtered bool, span Span)
 
-
 type Filter struct {
-	fn FilterFunc
+	fn       FilterFunc
 	priority int
-	invert bool
+	invert   bool
 }
 
 func NewFilter(fn FilterFunc, priority int, invert bool) *Filter {
 	return &Filter{
-		fn: fn,
+		fn:       fn,
 		priority: priority,
-		invert: invert,
+		invert:   invert,
 	}
 }
 
@@ -36,7 +34,6 @@ func (f Filter) Priority() int {
 }
 
 type Schedule struct {
-	filters []Filter
+	filters   []Filter
 	precision dura.Unit
 }
-

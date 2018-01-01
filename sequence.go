@@ -2,7 +2,6 @@ package chron
 
 import (
 	"github.com/dustinevan/chron/dura"
-	"github.com/dustinevan/time/chron"
 )
 
 type SeqOption func(*Sequence) error
