@@ -63,11 +63,11 @@ func (t TimeExact) AddN(n int) TimeExact {
 }
 
 // span.Time implementation
-func (t TimeExact) Start() Time {
+func (t TimeExact) Start() TimeExact {
 	return t
 }
 
-func (t TimeExact) End() Time {
+func (t TimeExact) End() TimeExact {
 	return t
 }
 

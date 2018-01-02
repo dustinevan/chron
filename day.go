@@ -48,11 +48,11 @@ func (d Day) AddN(n int) Day {
 }
 
 // span.Time implementation
-func (d Day) Start() Time {
+func (d Day) Start() TimeExact {
 	return d.AsTimeExact()
 }
 
-func (d Day) End() Time {
+func (d Day) End() TimeExact {
 	return d.AddN(1).Decrement(dura.Nano)
 }
 

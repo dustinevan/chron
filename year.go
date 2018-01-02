@@ -46,11 +46,11 @@ func (y Year) AddN(n int) Year {
 }
 
 // span.Time implementation
-func (y Year) Start() Time {
+func (y Year) Start() TimeExact {
 	return y.AsTimeExact()
 }
 
-func (y Year) End() Time {
+func (y Year) End() TimeExact {
 	return y.AddN(1).Decrement(dura.Nano)
 }
 
