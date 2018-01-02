@@ -9,9 +9,9 @@ import (
 type Span interface {
 	Start() TimeExact
 	End() TimeExact
-	Before(Time) bool
-	After(Time) bool
-	Contains(Time) bool
+	Before(Span) bool
+	After(Span) bool
+	Contains(Span) bool
 	Duration() dura.Time
 }
 
