@@ -46,11 +46,11 @@ func (m Milli) AddN(n int) Milli {
 }
 
 // span.Time implementation
-func (m Milli) Start() Time {
+func (m Milli) Start() TimeExact {
 	return m.AsTimeExact()
 }
 
-func (m Milli) End() Time {
+func (m Milli) End() TimeExact {
 	return m.AddN(1).Decrement(dura.Nano)
 }
 

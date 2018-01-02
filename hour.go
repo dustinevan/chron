@@ -46,11 +46,11 @@ func (h Hour) AddN(n int) Hour {
 }
 
 // span.Time implementation
-func (h Hour) Start() Time {
+func (h Hour) Start() TimeExact {
 	return h.AsTimeExact()
 }
 
-func (h Hour) End() Time {
+func (h Hour) End() TimeExact {
 	return h.AddN(1).Decrement(dura.Nano)
 }
 

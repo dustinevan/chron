@@ -46,11 +46,11 @@ func (m Month) AddN(n int) Month {
 }
 
 // span.Time implementation
-func (m Month) Start() Time {
+func (m Month) Start() TimeExact {
 	return m.AsTimeExact()
 }
 
-func (m Month) End() Time {
+func (m Month) End() TimeExact {
 	return m.AddN(1).Decrement(dura.Nano)
 }
 
