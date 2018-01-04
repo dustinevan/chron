@@ -6,7 +6,17 @@ import (
 	"github.com/dustinevan/chron/dura"
 )
 
+// Time implementations are instants in time that are transferable to
+// other instants with a different precision--year, month, day, hour,
+// minute, second, milli, micro, nano (which is called TimeExact).
+// Implementations are also transferable to an underlying time.Time
+// via AsTime().
 type Time interface {
+
+	// Implementations of Time have methods that transfer the data to
+	// structs with different precision. For example: 2017-01-05 12:45:06
+	// is a has second precision, if this data were represented as a chron.Second
+	// sec.AsDay() would truncate the time to 2017-01-05 00:00:00.
 	AsYear() Year
 	AsMonth() Month
 	AsDay() Day
@@ -17,7 +27,10 @@ type Time interface {
 	AsMicro() Micro
 	AsTimeExact() TimeExact
 	AsTime() time.Time
+	Incrementable
+}
 
+type Incrementable interface {
 	Increment(dura.Time) TimeExact
 	Decrement(dura.Time) TimeExact
 }

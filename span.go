@@ -9,10 +9,14 @@ import (
 type Span interface {
 	Start() TimeExact
 	End() TimeExact
+	Duration() dura.Time
+	Comparable
+}
+
+type Comparable interface {
 	Before(Span) bool
 	After(Span) bool
 	Contains(Span) bool
-	Duration() dura.Time
 }
 
 type TimeSpan struct {
