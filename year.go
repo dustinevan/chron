@@ -6,6 +6,7 @@ import (
 	"github.com/dustinevan/chron/dura"
 )
 
+//
 type Year struct {
 	time.Time
 }
