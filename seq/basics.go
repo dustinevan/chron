@@ -7,7 +7,6 @@ import (
 
 	"github.com/dustinevan/chron"
 	"github.com/dustinevan/chron/dura"
-	"github.com/golang/protobuf/ptypes/duration"
 )
 
 func DateRange(begin, end chron.Day) (<-chan chron.Day, cancel) {

@@ -4,6 +4,9 @@ import (
 	"time"
 
 	"github.com/dustinevan/chron/dura"
+	"fmt"
+	"reflect"
+	"database/sql/driver"
 )
 
 //
@@ -105,4 +108,21 @@ func (y Year) AddMicro(m int) Micro {
 
 func (y Year) AddNano(n int) TimeExact {
 	return y.AsTimeExact().AddN(n)
+}
+
+func (y *Year) Scan(value interface{}) error {
+	if value == nil {
+		*y = ZeroValue().AsYear()
+		return nil
+	}
+	if t, ok := value.(time.Time); ok {
+		*y = YearOf(t)
+		return nil
+	}
+	return fmt.Errorf("unsupported Scan, storing %s into type *chron.Day", reflect.TypeOf(value))
+}
+
+func (y Year) Value() (driver.Value, error) {
+	// todo: error check the range.
+	return y.Time, nil
 }
