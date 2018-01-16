@@ -4,6 +4,9 @@ import (
 	"time"
 
 	"github.com/dustinevan/chron/dura"
+	"fmt"
+	"reflect"
+	"database/sql/driver"
 )
 
 // Time implementations are instants in time that are transferable to
@@ -101,9 +104,16 @@ func (t TimeExact) Duration() dura.Time {
 }
 
 func ZeroValue() TimeExact {
+	return TimeOf(time.Time{})
+}
+
+func ZeroYear() TimeExact {
 	return NewYear(0).AsTimeExact()
 }
 
+func ZeroUnix() TimeExact {
+	return TimeOf(time.Unix(0, 0))
+}
 // see: https://stackoverflow.com/questions/25065055/what-is-the-maximum-time-time-in-go
 // and time.Unix() implementation
 var unixToInternal = int64((1969*365 + 1969/4 - 1969/100 + 1969/400) * 24 * 60 * 60)
@@ -152,4 +162,21 @@ func (t TimeExact) AddMicro(m int) TimeExact {
 
 func (t TimeExact) AddNano(n int) TimeExact {
 	return t.AddN(n)
+}
+
+func (t *TimeExact) Scan(value interface{}) error {
+	if value == nil {
+		*t = ZeroValue().AsTimeExact()
+		return nil
+	}
+	if tt, ok := value.(time.Time); ok {
+		*t = TimeOf(tt)
+		return nil
+	}
+	return fmt.Errorf("unsupported Scan, storing %s into type *chron.Day", reflect.TypeOf(value))
+}
+
+func (t TimeExact) Value() (driver.Value, error) {
+	// todo: error check the range.
+	return t.Time, nil
 }

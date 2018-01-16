@@ -3,6 +3,11 @@ package chron
 import (
 	"time"
 
+	"fmt"
+	"reflect"
+
+	"database/sql/driver"
+
 	"github.com/dustinevan/chron/dura"
 )
 
@@ -107,4 +112,21 @@ func (d Day) AddMicro(m int) Micro {
 
 func (d Day) AddNano(n int) TimeExact {
 	return d.AsTimeExact().AddN(n)
+}
+
+func (d *Day) Scan(value interface{}) error {
+	if value == nil {
+		*d = ZeroValue().AsDay()
+		return nil
+	}
+	if t, ok := value.(time.Time); ok {
+		*d = DayOf(t)
+		return nil
+	}
+	return fmt.Errorf("unsupported Scan, storing %s into type *chron.Day", reflect.TypeOf(value))
+}
+
+func (d Day) Value() (driver.Value, error) {
+	// todo: error check the range.
+	return d.Time, nil
 }

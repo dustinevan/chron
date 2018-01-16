@@ -4,6 +4,9 @@ import (
 	"time"
 
 	"github.com/dustinevan/chron/dura"
+	"fmt"
+	"reflect"
+	"database/sql/driver"
 )
 
 type Month struct {
@@ -104,4 +107,21 @@ func (m Month) AddMicro(mi int) Micro {
 
 func (m Month) AddNano(n int) TimeExact {
 	return m.AsTimeExact().AddN(n)
+}
+
+func (m *Month) Scan(value interface{}) error {
+	if value == nil {
+		*m = ZeroValue().AsMonth()
+		return nil
+	}
+	if t, ok := value.(time.Time); ok {
+		*m = MonthOf(t)
+		return nil
+	}
+	return fmt.Errorf("unsupported Scan, storing %s into type *chron.Day", reflect.TypeOf(value))
+}
+
+func (m Month) Value() (driver.Value, error) {
+	// todo: error check the range.
+	return m.Time, nil
 }
