@@ -99,7 +99,8 @@ func (d Duration) String() string {
 type Unit int
 
 const (
-	Century Unit = iota + 1
+	Zero Unit = iota
+	Century
 	Decade
 	Year
 	Quarter
@@ -115,7 +116,7 @@ const (
 )
 
 var units = []string{
-	"Invalid Unit",
+	"Zero Unit",
 	"Century",
 	"Decade",
 	"Year",
