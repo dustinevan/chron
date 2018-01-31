@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 type Milli struct {
@@ -124,4 +125,14 @@ func (m *Milli) Scan(value interface{}) error {
 func (m Milli) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return m.Time, nil
+}
+
+func (m *Milli) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	s := strings.Trim(string(data), `"`)
+	t, err := Parse(s)
+	*m = MilliOf(t)
+	return err
 }

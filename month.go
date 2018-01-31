@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 type Month struct {
@@ -124,4 +125,14 @@ func (m *Month) Scan(value interface{}) error {
 func (m Month) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return m.Time, nil
+}
+
+func (m *Month) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	s := strings.Trim(string(data), `"`)
+	t, err := Parse(s)
+	*m = MonthOf(t)
+	return err
 }
