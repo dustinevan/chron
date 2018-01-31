@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 //
@@ -125,4 +126,14 @@ func (y *Year) Scan(value interface{}) error {
 func (y Year) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return y.Time, nil
+}
+
+func (y *Year) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	s := strings.Trim(string(data), `"`)
+	t, err := Parse(s)
+	*y = YearOf(t)
+	return err
 }

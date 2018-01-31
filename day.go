@@ -9,6 +9,7 @@ import (
 	"database/sql/driver"
 
 	"github.com/dustinevan/chron/dura"
+	"strings"
 )
 
 type Day struct {
@@ -129,4 +130,14 @@ func (d *Day) Scan(value interface{}) error {
 func (d Day) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return d.Time, nil
+}
+
+func (d *Day) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	s := strings.Trim(string(data), `"`)
+	t, err := Parse(s)
+	*d = DayOf(t)
+	return err
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 // Time implementations are instants in time that are transferable to
@@ -103,30 +104,7 @@ func (t TimeExact) Duration() dura.Time {
 	return dura.Micro
 }
 
-func ZeroValue() TimeExact {
-	return TimeOf(time.Time{})
-}
 
-func ZeroYear() TimeExact {
-	return NewYear(0).AsTimeExact()
-}
-
-func ZeroUnix() TimeExact {
-	return TimeOf(time.Unix(0, 0))
-}
-// see: https://stackoverflow.com/questions/25065055/what-is-the-maximum-time-time-in-go
-// and time.Unix() implementation
-var unixToInternal = int64((1969*365 + 1969/4 - 1969/100 + 1969/400) * 24 * 60 * 60)
-var max = time.Unix(1<<63-1-unixToInternal, 999999999).UTC()
-var min = time.Unix(-1*int64(^uint(0)>>1)-1+unixToInternal, 0).UTC()
-
-func MaxValue() TimeExact {
-	return TimeOf(max)
-}
-
-func MinValue() TimeExact {
-	return TimeOf(min)
-}
 
 func (t TimeExact) AddYears(y int) TimeExact {
 	return t.Increment(dura.Years(y))
@@ -179,4 +157,56 @@ func (t *TimeExact) Scan(value interface{}) error {
 func (t TimeExact) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return t.Time, nil
+}
+
+
+func ZeroValue() TimeExact {
+	return TimeOf(time.Time{})
+}
+
+func ZeroYear() TimeExact {
+	return NewYear(0).AsTimeExact()
+}
+
+func ZeroUnix() TimeExact {
+	return TimeOf(time.Unix(0, 0))
+}
+
+func ZeroTime() time.Time {
+	return time.Time{}
+}
+
+// see: https://stackoverflow.com/questions/25065055/what-is-the-maximum-time-time-in-go
+// and time.Unix() implementation
+var unixToInternal = int64((1969*365 + 1969/4 - 1969/100 + 1969/400) * 24 * 60 * 60)
+var max = time.Unix(1<<63-1-unixToInternal, 999999999).UTC()
+var min = time.Unix(-1*int64(^uint(0)>>1)-1+unixToInternal, 0).UTC()
+
+func MaxValue() TimeExact {
+	return TimeOf(max)
+}
+
+func MinValue() TimeExact {
+	return TimeOf(min)
+}
+
+func Parse(s string) (time.Time, error) {
+	var errs []error
+	for _, fn := range ParseFunctions {
+		t, err := fn(s)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		return t, nil
+	}
+	return ZeroTime(), ErrJoin(errs, "; ")
+}
+
+func ErrJoin(errs []error, delim string) error {
+	s := make([]string, 0)
+	for _, e := range errs {
+		s = append(s, e.Error())
+	}
+	return fmt.Errorf("%s", strings.Join(s, delim))
 }

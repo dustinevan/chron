@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 type Hour struct {
@@ -124,4 +125,14 @@ func (h *Hour) Scan(value interface{}) error {
 func (h Hour) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return h.Time, nil
+}
+
+func (h *Hour) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	s := strings.Trim(string(data), `"`)
+	t, err := Parse(s)
+	*h = HourOf(t)
+	return err
 }

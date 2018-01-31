@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 type Micro struct {
@@ -124,4 +125,14 @@ func (m *Micro) Scan(value interface{}) error {
 func (m Micro) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return m.Time, nil
+}
+
+func (m *Micro) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	s := strings.Trim(string(data), `"`)
+	t, err := Parse(s)
+	*m = MicroOf(t)
+	return err
 }

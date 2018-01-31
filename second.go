@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 type Second struct {
@@ -124,4 +125,14 @@ func (s *Second) Scan(value interface{}) error {
 func (s Second) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return s.Time, nil
+}
+
+func (s *Second) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	st := strings.Trim(string(data), `"`)
+	t, err := Parse(st)
+	*s = SecondOf(t)
+	return err
 }
