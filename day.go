@@ -25,8 +25,9 @@ func Today() Day {
 	return Now().AsDay()
 }
 
-func DayOf(time time.Time) Day {
-	return NewDay(time.Year(), time.Month(), time.Day())
+func DayOf(t time.Time) Day {
+	t.UTC()
+	return NewDay(t.Year(), t.Month(), t.Day())
 }
 
 // chron.Time implementation
@@ -107,11 +108,11 @@ func (d Day) AddMillis(m int) Milli {
 	return d.AsMilli().AddN(m)
 }
 
-func (d Day) AddMicro(m int) Micro {
+func (d Day) AddMicros(m int) Micro {
 	return d.AsMicro().AddN(m)
 }
 
-func (d Day) AddNano(n int) TimeExact {
+func (d Day) AddNanos(n int) TimeExact {
 	return d.AsTimeExact().AddN(n)
 }
 
@@ -127,10 +128,11 @@ func (d *Day) Scan(value interface{}) error {
 	return fmt.Errorf("unsupported Scan, storing %s into type *chron.Day", reflect.TypeOf(value))
 }
 
+// it is the callers responsibility to manage the db specific date range.
 func (d Day) Value() (driver.Value, error) {
-	// todo: error check the range.
 	return d.Time, nil
 }
+
 
 func (d *Day) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {

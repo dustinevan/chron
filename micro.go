@@ -102,11 +102,11 @@ func (m Micro) AddMillis(ms int) Micro {
 	return m.Increment(dura.Millis(ms)).AsMicro()
 }
 
-func (m Micro) AddMicro(ms int) Micro {
+func (m Micro) AddMicros(ms int) Micro {
 	return m.AddN(ms)
 }
 
-func (m Micro) AddNano(n int) TimeExact {
+func (m Micro) AddNanos(n int) TimeExact {
 	return m.AsTimeExact().AddN(n)
 }
 

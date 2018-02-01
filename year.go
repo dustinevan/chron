@@ -23,8 +23,9 @@ func ThisYear() Year {
 	return Now().AsYear()
 }
 
-func YearOf(time time.Time) Year {
-	return NewYear(time.Year())
+func YearOf(t time.Time) Year {
+	t.UTC()
+	return NewYear(t.Year())
 }
 
 func (y Year) AsYear() Year           { return y }
@@ -103,11 +104,11 @@ func (y Year) AddMillis(m int) Milli {
 	return y.AsMilli().AddN(m)
 }
 
-func (y Year) AddMicro(m int) Micro {
+func (y Year) AddMicros(m int) Micro {
 	return y.AsMicro().AddN(m)
 }
 
-func (y Year) AddNano(n int) TimeExact {
+func (y Year) AddNanos(n int) TimeExact {
 	return y.AsTimeExact().AddN(n)
 }
 

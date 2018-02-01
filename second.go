@@ -23,6 +23,7 @@ func ThisSecond() Second {
 }
 
 func SecondOf(t time.Time) Second {
+	t = t.UTC()
 	return Second{t.Truncate(time.Second)}
 }
 
@@ -102,11 +103,11 @@ func (s Second) AddMillis(m int) Milli {
 	return s.AsMilli().AddN(m)
 }
 
-func (s Second) AddMicro(m int) Micro {
+func (s Second) AddMicros(m int) Micro {
 	return s.AsMicro().AddN(m)
 }
 
-func (s Second) AddNano(n int) TimeExact {
+func (s Second) AddNanos(n int) TimeExact {
 	return s.AsTimeExact().AddN(n)
 }
 
