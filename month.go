@@ -22,8 +22,9 @@ func ThisMonth() Month {
 	return Now().AsMonth()
 }
 
-func MonthOf(time time.Time) Month {
-	return NewMonth(time.Year(), time.Month())
+func MonthOf(t time.Time) Month {
+	t = t.UTC()
+	return NewMonth(t.Year(), t.Month())
 }
 
 func (m Month) AsYear() Year           { return YearOf(m.Time) }
@@ -102,11 +103,11 @@ func (m Month) AddMillis(mi int) Milli {
 	return m.AsMilli().AddN(mi)
 }
 
-func (m Month) AddMicro(mi int) Micro {
+func (m Month) AddMicros(mi int) Micro {
 	return m.AsMicro().AddN(mi)
 }
 
-func (m Month) AddNano(n int) TimeExact {
+func (m Month) AddNanos(n int) TimeExact {
 	return m.AsTimeExact().AddN(n)
 }
 

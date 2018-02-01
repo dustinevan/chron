@@ -64,7 +64,7 @@ func ParseUnixSeconds(secs string) (time.Time, error) {
 	if err != nil {
 		return ZeroTime(), err
 	}
-	return time.Unix(int64(i), 0), nil
+	return time.Unix(int64(i), 0).UTC(), nil
 }
 
 func ParseWithFormats(s string) (time.Time, error) {

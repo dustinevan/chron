@@ -134,11 +134,11 @@ func (t TimeExact) AddMillis(m int) TimeExact {
 	return t.Increment(dura.Millis(m))
 }
 
-func (t TimeExact) AddMicro(m int) TimeExact {
+func (t TimeExact) AddMicros(m int) TimeExact {
 	return t.Increment(dura.Micros(m))
 }
 
-func (t TimeExact) AddNano(n int) TimeExact {
+func (t TimeExact) AddNanos(n int) TimeExact {
 	return t.AddN(n)
 }
 
@@ -180,14 +180,14 @@ func ZeroTime() time.Time {
 // and time.Unix() implementation
 var unixToInternal = int64((1969*365 + 1969/4 - 1969/100 + 1969/400) * 24 * 60 * 60)
 var max = time.Unix(1<<63-1-unixToInternal, 999999999).UTC()
-var min = time.Unix(-1*int64(^uint(0)>>1)-1+unixToInternal, 0).UTC()
+var minimum = time.Unix(-1*int64(^uint(0)>>1)-1+unixToInternal, 0).UTC()
 
 func MaxValue() TimeExact {
 	return TimeOf(max)
 }
 
 func MinValue() TimeExact {
-	return TimeOf(min)
+	return TimeOf(minimum)
 }
 
 func Parse(s string) (time.Time, error) {

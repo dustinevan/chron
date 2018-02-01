@@ -22,8 +22,9 @@ func ThisHour() Hour {
 	return Now().AsHour()
 }
 
-func HourOf(time time.Time) Hour {
-	return NewHour(time.Year(), time.Month(), time.Day(), time.Hour())
+func HourOf(t time.Time) Hour {
+	t = t.UTC()
+	return NewHour(t.Year(), t.Month(), t.Day(), t.Hour())
 }
 
 func (h Hour) AsYear() Year           { return YearOf(h.Time) }
@@ -102,11 +103,11 @@ func (h Hour) AddMillis(m int) Milli {
 	return h.AsMilli().AddN(m)
 }
 
-func (h Hour) AddMicro(m int) Micro {
+func (h Hour) AddMicros(m int) Micro {
 	return h.AsMicro().AddN(m)
 }
 
-func (h Hour) AddNano(n int) TimeExact {
+func (h Hour) AddNanos(n int) TimeExact {
 	return h.AsTimeExact().AddN(n)
 }
 
