@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 type Hour struct {
@@ -21,27 +22,28 @@ func ThisHour() Hour {
 	return Now().AsHour()
 }
 
-func HourOf(time time.Time) Hour {
-	return NewHour(time.Year(), time.Month(), time.Day(), time.Hour())
+func HourOf(t time.Time) Hour {
+	t = t.UTC()
+	return NewHour(t.Year(), t.Month(), t.Day(), t.Hour())
 }
 
-func (h Hour) AsYear() Year           { return YearOf(h.Time) }
-func (h Hour) AsMonth() Month         { return MonthOf(h.Time) }
-func (h Hour) AsDay() Day             { return DayOf(h.Time) }
-func (h Hour) AsHour() Hour           { return h }
-func (h Hour) AsMinute() Minute       { return MinuteOf(h.Time) }
-func (h Hour) AsSecond() Second       { return SecondOf(h.Time) }
-func (h Hour) AsMilli() Milli         { return MilliOf(h.Time) }
-func (h Hour) AsMicro() Micro         { return MicroOf(h.Time) }
-func (h Hour) AsTimeExact() TimeExact { return TimeOf(h.Time) }
-func (h Hour) AsTime() time.Time      { return h.Time }
+func (h Hour) AsYear() Year       { return YearOf(h.Time) }
+func (h Hour) AsMonth() Month     { return MonthOf(h.Time) }
+func (h Hour) AsDay() Day         { return DayOf(h.Time) }
+func (h Hour) AsHour() Hour       { return h }
+func (h Hour) AsMinute() Minute   { return MinuteOf(h.Time) }
+func (h Hour) AsSecond() Second   { return SecondOf(h.Time) }
+func (h Hour) AsMilli() Milli     { return MilliOf(h.Time) }
+func (h Hour) AsMicro() Micro     { return MicroOf(h.Time) }
+func (h Hour) AsChron() Chron { return TimeOf(h.Time) }
+func (h Hour) AsTime() time.Time  { return h.Time }
 
-func (h Hour) Increment(l dura.Time) TimeExact {
-	return TimeExact{h.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
+func (h Hour) Increment(l dura.Time) Chron {
+	return Chron{h.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (h Hour) Decrement(l dura.Time) TimeExact {
-	return TimeExact{h.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
+func (h Hour) Decrement(l dura.Time) Chron {
+	return Chron{h.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (h Hour) AddN(n int) Hour {
@@ -49,11 +51,11 @@ func (h Hour) AddN(n int) Hour {
 }
 
 // span.Time implementation
-func (h Hour) Start() TimeExact {
-	return h.AsTimeExact()
+func (h Hour) Start() Chron {
+	return h.AsChron()
 }
 
-func (h Hour) End() TimeExact {
+func (h Hour) End() Chron {
 	return h.AddN(1).Decrement(dura.Nano)
 }
 
@@ -101,12 +103,12 @@ func (h Hour) AddMillis(m int) Milli {
 	return h.AsMilli().AddN(m)
 }
 
-func (h Hour) AddMicro(m int) Micro {
+func (h Hour) AddMicros(m int) Micro {
 	return h.AsMicro().AddN(m)
 }
 
-func (h Hour) AddNano(n int) TimeExact {
-	return h.AsTimeExact().AddN(n)
+func (h Hour) AddNanos(n int) Chron {
+	return h.AsChron().AddN(n)
 }
 
 func (h *Hour) Scan(value interface{}) error {
@@ -124,4 +126,14 @@ func (h *Hour) Scan(value interface{}) error {
 func (h Hour) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return h.Time, nil
+}
+
+func (h *Hour) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	s := strings.Trim(string(data), `"`)
+	t, err := Parse(s)
+	*h = HourOf(t)
+	return err
 }

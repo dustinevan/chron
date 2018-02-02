@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"database/sql/driver"
+	"strings"
 )
 
 type Micro struct {
@@ -22,26 +23,27 @@ func ThisMicro() Micro {
 }
 
 func MicroOf(t time.Time) Micro {
+	t = t.UTC()
 	return Micro{t.Truncate(time.Microsecond)}
 }
 
-func (m Micro) AsYear() Year           { return YearOf(m.Time) }
-func (m Micro) AsMonth() Month         { return MonthOf(m.Time) }
-func (m Micro) AsDay() Day             { return DayOf(m.Time) }
-func (m Micro) AsHour() Hour           { return HourOf(m.Time) }
-func (m Micro) AsMinute() Minute       { return MinuteOf(m.Time) }
-func (m Micro) AsSecond() Second       { return SecondOf(m.Time) }
-func (m Micro) AsMilli() Milli         { return MilliOf(m.Time) }
-func (m Micro) AsMicro() Micro         { return m }
-func (m Micro) AsTimeExact() TimeExact { return TimeOf(m.Time) }
-func (m Micro) AsTime() time.Time      { return m.Time }
+func (m Micro) AsYear() Year       { return YearOf(m.Time) }
+func (m Micro) AsMonth() Month     { return MonthOf(m.Time) }
+func (m Micro) AsDay() Day         { return DayOf(m.Time) }
+func (m Micro) AsHour() Hour       { return HourOf(m.Time) }
+func (m Micro) AsMinute() Minute   { return MinuteOf(m.Time) }
+func (m Micro) AsSecond() Second   { return SecondOf(m.Time) }
+func (m Micro) AsMilli() Milli     { return MilliOf(m.Time) }
+func (m Micro) AsMicro() Micro     { return m }
+func (m Micro) AsChron() Chron { return TimeOf(m.Time) }
+func (m Micro) AsTime() time.Time  { return m.Time }
 
-func (m Micro) Increment(l dura.Time) TimeExact {
-	return TimeExact{m.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
+func (m Micro) Increment(l dura.Time) Chron {
+	return Chron{m.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (m Micro) Decrement(l dura.Time) TimeExact {
-	return TimeExact{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
+func (m Micro) Decrement(l dura.Time) Chron {
+	return Chron{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (m Micro) AddN(n int) Micro {
@@ -49,11 +51,11 @@ func (m Micro) AddN(n int) Micro {
 }
 
 // span.Time implementation
-func (m Micro) Start() TimeExact {
-	return m.AsTimeExact()
+func (m Micro) Start() Chron {
+	return m.AsChron()
 }
 
-func (m Micro) End() TimeExact {
+func (m Micro) End() Chron {
 	return m.AddN(1).Decrement(dura.Nano)
 }
 
@@ -101,12 +103,12 @@ func (m Micro) AddMillis(ms int) Micro {
 	return m.Increment(dura.Millis(ms)).AsMicro()
 }
 
-func (m Micro) AddMicro(ms int) Micro {
+func (m Micro) AddMicros(ms int) Micro {
 	return m.AddN(ms)
 }
 
-func (m Micro) AddNano(n int) TimeExact {
-	return m.AsTimeExact().AddN(n)
+func (m Micro) AddNanos(n int) Chron {
+	return m.AsChron().AddN(n)
 }
 
 func (m *Micro) Scan(value interface{}) error {
@@ -124,4 +126,14 @@ func (m *Micro) Scan(value interface{}) error {
 func (m Micro) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return m.Time, nil
+}
+
+func (m *Micro) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	s := strings.Trim(string(data), `"`)
+	t, err := Parse(s)
+	*m = MicroOf(t)
+	return err
 }
