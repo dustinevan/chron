@@ -36,7 +36,7 @@ func TestMinute_Transfers(t *testing.T) {
 }
 
 func TestMinute_Increment(t *testing.T) {
-	y := min.Increment(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	y := min.Increment(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := tmin.AddDate(1, 2, 30).Add(time.Second * 500)
 	assert.Exactly(t, td, y.Time)
 }
@@ -46,7 +46,7 @@ func TestMinute_AsTime(t *testing.T) {
 }
 
 func TestMinute_Decrement(t *testing.T) {
-	d := min.Decrement(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	d := min.Decrement(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := tmin.AddDate(-1, -2, -30).Add(time.Second * -500)
 	assert.Exactly(t, td, d.Time)
 

@@ -36,7 +36,7 @@ func TestHour_Transfers(t *testing.T) {
 }
 
 func TestHour_Increment(t *testing.T) {
-	y := hour.Increment(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	y := hour.Increment(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := thour.AddDate(1, 2, 30).Add(time.Second * 500)
 	assert.Exactly(t, td, y.Time)
 }
@@ -46,7 +46,7 @@ func TestHour_AsTime(t *testing.T) {
 }
 
 func TestHour_Decrement(t *testing.T) {
-	d := hour.Decrement(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	d := hour.Decrement(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := thour.AddDate(-1, -2, -30).Add(time.Second * -500)
 	assert.Exactly(t, td, d.Time)
 

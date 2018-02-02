@@ -36,7 +36,7 @@ func TestSecond_Transfers(t *testing.T) {
 }
 
 func TestSecond_Increment(t *testing.T) {
-	y := sec.Increment(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	y := sec.Increment(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := tsec.AddDate(1, 2, 30).Add(time.Second * 500)
 	assert.Exactly(t, td, y.Time)
 }
@@ -46,7 +46,7 @@ func TestSecond_AsTime(t *testing.T) {
 }
 
 func TestSecond_Decrement(t *testing.T) {
-	d := sec.Decrement(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	d := sec.Decrement(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := tsec.AddDate(-1, -2, -30).Add(time.Second * -500)
 	assert.Exactly(t, td, d.Time)
 

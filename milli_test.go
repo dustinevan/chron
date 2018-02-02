@@ -30,7 +30,7 @@ func TestMilli_Transfers(t *testing.T) {
 }
 
 func TestMilli_Increment(t *testing.T) {
-	y := milli.Increment(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Millisecond * 500})
+	y := milli.Increment(dura.NewDuration(1, 2, 30, time.Millisecond * 500))
 	td := tmilli.AddDate(1, 2, 30).Add(time.Millisecond * 500)
 	assert.Exactly(t, td, y.Time)
 }
@@ -40,7 +40,7 @@ func TestMilli_AsTime(t *testing.T) {
 }
 
 func TestMilli_Decrement(t *testing.T) {
-	d := milli.Decrement(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Millisecond * 500})
+	d := milli.Decrement(dura.NewDuration(1, 2, 30, time.Millisecond * 500))
 	td := tmilli.AddDate(-1, -2, -30).Add(time.Millisecond * -500)
 	assert.Exactly(t, td, d.Time)
 

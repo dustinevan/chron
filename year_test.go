@@ -36,7 +36,7 @@ func TestYear_Transfers(t *testing.T) {
 }
 
 func TestYear_Increment(t *testing.T) {
-	y := year.Increment(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	y := year.Increment(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := tyear.AddDate(1, 2, 30).Add(time.Second * 500)
 	assert.Exactly(t, td, y.Time)
 }
@@ -46,7 +46,7 @@ func TestYear_AsTime(t *testing.T) {
 }
 
 func TestYear_Decrement(t *testing.T) {
-	d := year.Decrement(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	d := year.Decrement(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := tyear.AddDate(-1, -2, -30).Add(time.Second * -500)
 	assert.Exactly(t, td, d.Time)
 

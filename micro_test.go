@@ -30,7 +30,7 @@ func TestMicro_Transfers(t *testing.T) {
 }
 
 func TestMicro_Increment(t *testing.T) {
-	y := micro.Increment(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Microsecond * 500})
+	y := micro.Increment(dura.NewDuration(1, 2, 30, time.Microsecond * 500))
 	td := tmicro.AddDate(1, 2, 30).Add(time.Microsecond * 500)
 	assert.Exactly(t, td, y.Time)
 }
@@ -40,7 +40,7 @@ func TestMicro_AsTime(t *testing.T) {
 }
 
 func TestMicro_Decrement(t *testing.T) {
-	d := micro.Decrement(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Microsecond * 500})
+	d := micro.Decrement(dura.NewDuration(1, 2, 30, time.Microsecond * 500))
 	td := tmicro.AddDate(-1, -2, -30).Add(time.Microsecond * -500)
 	assert.Exactly(t, td, d.Time)
 
