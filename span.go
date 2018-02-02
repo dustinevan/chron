@@ -7,56 +7,56 @@ import (
 )
 
 type Span interface {
-	Start() TimeExact
-	End() TimeExact
+	Start() Chron
+	End() Chron
 	Duration() dura.Time
-	Comparable
+	Comparer
 }
 
-type Comparable interface {
+type Comparer interface {
 	Before(Span) bool
 	After(Span) bool
 	Contains(Span) bool
 }
 
-type TimeSpan struct {
-	start TimeExact
-	end   TimeExact
+type Interval struct {
+	start Chron
+	end   Chron
 	d     dura.Time
 }
 
-func NewTimeSpan(start TimeExact, d dura.Time) *TimeSpan {
-	return &TimeSpan{
+func NewInterval(start Chron, d dura.Time) *Interval {
+	return &Interval{
 		start: start,
 		end:   start.Increment(d).Decrement(dura.Nano),
 		d:     d,
 	}
 }
 
-func (s TimeSpan) Contains(t Span) bool {
+func (s Interval) Contains(t Span) bool {
 	return !s.Before(t) && !s.After(t)
 }
 
-func (s TimeSpan) Before(t Span) bool {
+func (s Interval) Before(t Span) bool {
 	return s.End().AsTime().Before(t.Start().AsTime())
 }
 
-func (s TimeSpan) After(t Span) bool {
+func (s Interval) After(t Span) bool {
 	return s.Start().AsTime().After(t.End().AsTime())
 }
 
-func (s TimeSpan) Duration() dura.Time {
+func (s Interval) Duration() dura.Time {
 	return s.d
 }
 
-func (s TimeSpan) Start() TimeExact {
+func (s Interval) Start() Chron {
 	return s.start
 }
 
-func (s TimeSpan) End() TimeExact {
+func (s Interval) End() Chron {
 	return s.end
 }
 
-func (s TimeSpan) String() string {
+func (s Interval) String() string {
 	return fmt.Sprintf("start:%s, end:%s, len:%s", s.start, s.end, s.d)
 }

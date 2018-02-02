@@ -27,23 +27,23 @@ func MinuteOf(t time.Time) Minute {
 	return NewMinute(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute())
 }
 
-func (m Minute) AsYear() Year           { return YearOf(m.Time) }
-func (m Minute) AsMonth() Month         { return MonthOf(m.Time) }
-func (m Minute) AsDay() Day             { return DayOf(m.Time) }
-func (m Minute) AsHour() Hour           { return HourOf(m.Time) }
-func (m Minute) AsMinute() Minute       { return m }
-func (m Minute) AsSecond() Second       { return SecondOf(m.Time) }
-func (m Minute) AsMilli() Milli         { return MilliOf(m.Time) }
-func (m Minute) AsMicro() Micro         { return MicroOf(m.Time) }
-func (m Minute) AsTimeExact() TimeExact { return TimeOf(m.Time) }
-func (m Minute) AsTime() time.Time      { return m.Time }
+func (m Minute) AsYear() Year       { return YearOf(m.Time) }
+func (m Minute) AsMonth() Month     { return MonthOf(m.Time) }
+func (m Minute) AsDay() Day         { return DayOf(m.Time) }
+func (m Minute) AsHour() Hour       { return HourOf(m.Time) }
+func (m Minute) AsMinute() Minute   { return m }
+func (m Minute) AsSecond() Second   { return SecondOf(m.Time) }
+func (m Minute) AsMilli() Milli     { return MilliOf(m.Time) }
+func (m Minute) AsMicro() Micro     { return MicroOf(m.Time) }
+func (m Minute) AsChron() Chron { return TimeOf(m.Time) }
+func (m Minute) AsTime() time.Time  { return m.Time }
 
-func (m Minute) Increment(l dura.Time) TimeExact {
-	return TimeExact{m.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
+func (m Minute) Increment(l dura.Time) Chron {
+	return Chron{m.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (m Minute) Decrement(l dura.Time) TimeExact {
-	return TimeExact{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
+func (m Minute) Decrement(l dura.Time) Chron {
+	return Chron{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (m Minute) AddN(n int) Minute {
@@ -51,11 +51,11 @@ func (m Minute) AddN(n int) Minute {
 }
 
 // span.Time implementation
-func (m Minute) Start() TimeExact {
-	return m.AsTimeExact()
+func (m Minute) Start() Chron {
+	return m.AsChron()
 }
 
-func (m Minute) End() TimeExact {
+func (m Minute) End() Chron {
 	return m.AddN(1).Decrement(dura.Nano)
 }
 
@@ -107,8 +107,8 @@ func (m Minute) AddMicros(ms int) Micro {
 	return m.AsMicro().AddN(ms)
 }
 
-func (m Minute) AddNanos(n int) TimeExact {
-	return m.AsTimeExact().AddN(n)
+func (m Minute) AddNanos(n int) Chron {
+	return m.AsChron().AddN(n)
 }
 
 func (m *Minute) Scan(value interface{}) error {

@@ -32,7 +32,7 @@ func TestMinute_Transfers(t *testing.T) {
 	assert.IsType(t, Second{}, ch.AsSecond())
 	assert.IsType(t, Milli{}, ch.AsMilli())
 	assert.IsType(t, Micro{}, ch.AsMicro())
-	assert.IsType(t, TimeExact{}, ch.AsTimeExact())
+	assert.IsType(t, Chron{}, ch.AsChron())
 }
 
 func TestMinute_Increment(t *testing.T) {
