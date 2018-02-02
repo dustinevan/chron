@@ -37,7 +37,7 @@ func TestDay_Transfers(t *testing.T) {
 }
 
 func TestDay_Increment(t *testing.T) {
-	d := day.Increment(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	d := day.Increment(dura.Duration{Yrs: 1, Mons: 2, Dys: 30, Dur: time.Second * 500})
 	td := tday.AddDate(1, 2, 30).Add(time.Second * 500)
 	assert.Exactly(t, td, d.Time)
 }
@@ -47,7 +47,7 @@ func TestDay_AsTime(t *testing.T) {
 }
 
 func TestDay_Decrement(t *testing.T) {
-	d := day.Decrement(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	d := day.Decrement(dura.Duration{Yrs: 1, Mons: 2, Dys: 30, Dur: time.Second * 500})
 	td := tday.AddDate(-1, -2, -30).Add(time.Second * -500)
 	assert.Exactly(t, td, d.Time)
 

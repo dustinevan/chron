@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dustinevan/chron/dura"
+	"time"
 )
 
 type Span interface {
@@ -26,6 +27,9 @@ type Interval struct {
 }
 
 func NewInterval(start Chron, d dura.Time) *Interval {
+	if d.Duration() == time.Nanosecond && d.Years() == 0 && d.Months() == 0 && d.Days() == 0 {
+		return &Interval{start: start, end: start, d: dura.Nano}
+	}
 	return &Interval{
 		start: start,
 		end:   start.Increment(d).Decrement(dura.Nano),

@@ -12,15 +12,12 @@ import (
 
 // Time implementations are instants in time that are transferable to
 // other instants with a different precision--year, month, day, hour,
-// minute, second, milli, micro, nano (which is called TimeExact).
+// minute, second, milli, micro, chron--which has nanosecond precision.
 // Implementations are also transferable to an underlying time.Time
-// via AsTime().
+// via AsTime(). Transferring to a type with lower precision truncates.
+// the underlying structs (Year, Month, ...) each wrap an anonymous
+// time.Time allowing access to general time.Time functionality.
 type Time interface {
-
-	// Implementations of Time have methods that transfer the data to
-	// structs with different precision. For example: 2017-01-05 12:45:06
-	// is a has second precision, if this data were represented as a chron.Second
-	// sec.AsDay() would truncate the time to 2017-01-05 00:00:00.
 	AsYear() Year
 	AsMonth() Month
 	AsDay() Day
@@ -34,11 +31,19 @@ type Time interface {
 	Incrementer
 }
 
+// Incrementer implementations take in a dura.Time (similar to time.Duration)
+// and return a nanosecond precision Chron instance. While Add and Sub functions
+// are available via the internal time.Time, these functions allow addition and
+// subtraction of fuzzy durations, Example: 1 year, 13 months, 54 days, and 3409853 seconds
+// year and month would increment the fuzzy year and month durations, while days and seconds
+// would increment by the exact values.
 type Incrementer interface {
 	Increment(dura.Time) Chron
 	Decrement(dura.Time) Chron
 }
 
+// Chron is analogous to time.Time. Chron has nanosecond precision and implements the
+// Time and Span interfaces.
 type Chron struct {
 	time.Time
 }

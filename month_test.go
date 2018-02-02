@@ -36,7 +36,7 @@ func TestMonth_Transfers(t *testing.T) {
 }
 
 func TestMonth_Increment(t *testing.T) {
-	y := month.Increment(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	y := month.Increment(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := tmonth.AddDate(1, 2, 30).Add(time.Second * 500)
 	assert.Exactly(t, td, y.Time)
 }
@@ -46,7 +46,7 @@ func TestMonth_AsTime(t *testing.T) {
 }
 
 func TestMonth_Decrement(t *testing.T) {
-	d := month.Decrement(dura.Duration{Year: 1, Month: 2, Day: 30, Dur: time.Second * 500})
+	d := month.Decrement(dura.NewDuration(1, 2, 30, time.Second * 500))
 	td := tmonth.AddDate(-1, -2, -30).Add(time.Second * -500)
 	assert.Exactly(t, td, d.Time)
 
