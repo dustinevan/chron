@@ -12,11 +12,11 @@ const (
 	DashMMDDYY        = "01-02-06"
 	DashMMDDYYYY      = "01-02-2006"
 	SlashMMDDYY       = "01/02/06"
-	SlashMMDDYYY      = "01/02/2006"
-	ShortDateTime     = SlashMMDDYYY + " 15:04 PM"
-	ShortSecond       = SlashMMDDYYY + " 15:04:05 PM"
-	ShortDateTime24   = SlashMMDDYYY + " 15:04"
-	ShortSecond24     = SlashMMDDYYY + " 15:04:05"
+	SlashMMDDYYYY      = "01/02/2006"
+	ShortDateTime     = SlashMMDDYYYY + " 15:04 PM"
+	ShortSecond       = SlashMMDDYYYY + " 15:04:05 PM"
+	ShortDateTime24   = SlashMMDDYYYY + " 15:04"
+	ShortSecond24     = SlashMMDDYYYY + " 15:04:05"
 	DashMonth         = "Jan-2006"
 	DashMonthShort    = "Jan-06"
 	DashNumMonth      = "01-2006"
@@ -41,7 +41,7 @@ var ParseFormats = []string{
 	DashMMDDYY,
 	DashMMDDYYYY,
 	SlashMMDDYY,
-	SlashMMDDYYY,
+	SlashMMDDYYYY,
 	ShortDateTime,
 	ShortSecond,
 	ShortDateTime24,
