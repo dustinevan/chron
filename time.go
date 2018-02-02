@@ -29,122 +29,123 @@ type Time interface {
 	AsSecond() Second
 	AsMilli() Milli
 	AsMicro() Micro
-	AsTimeExact() TimeExact
+	AsChron() Chron
 	AsTime() time.Time
-	Incrementable
+	Incrementer
 }
 
-type Incrementable interface {
-	Increment(dura.Time) TimeExact
-	Decrement(dura.Time) TimeExact
+type Incrementer interface {
+	Increment(dura.Time) Chron
+	Decrement(dura.Time) Chron
 }
 
-type TimeExact struct {
+type Chron struct {
 	time.Time
 }
 
-func Now() TimeExact {
+func Now() Chron {
 	return TimeOf(time.Now().In(time.UTC))
 }
 
-func NewTime(year int, month time.Month, day, hour, min, sec, nano int) TimeExact {
-	return TimeExact{time.Date(year, time.Month(month), day, hour, min, sec, nano, time.UTC)}
+func NewTime(year int, month time.Month, day, hour, min, sec, nano int) Chron {
+	return Chron{time.Date(year, time.Month(month), day, hour, min, sec, nano, time.UTC)}
 }
 
-func TimeOf(t time.Time) TimeExact {
-	return TimeExact{t}
+func TimeOf(t time.Time) Chron {
+	t = t.UTC()
+	return Chron{t}
 }
 
-func (t TimeExact) AsYear() Year           { return YearOf(t.Time) }
-func (t TimeExact) AsMonth() Month         { return MonthOf(t.Time) }
-func (t TimeExact) AsDay() Day             { return DayOf(t.Time) }
-func (t TimeExact) AsHour() Hour           { return HourOf(t.Time) }
-func (t TimeExact) AsMinute() Minute       { return MinuteOf(t.Time) }
-func (t TimeExact) AsSecond() Second       { return SecondOf(t.Time) }
-func (t TimeExact) AsMilli() Milli         { return MilliOf(t.Time) }
-func (t TimeExact) AsMicro() Micro         { return MicroOf(t.Time) }
-func (t TimeExact) AsTimeExact() TimeExact { return t }
-func (t TimeExact) AsTime() time.Time      { return t.Time }
+func (t Chron) AsYear() Year       { return YearOf(t.Time) }
+func (t Chron) AsMonth() Month     { return MonthOf(t.Time) }
+func (t Chron) AsDay() Day         { return DayOf(t.Time) }
+func (t Chron) AsHour() Hour       { return HourOf(t.Time) }
+func (t Chron) AsMinute() Minute   { return MinuteOf(t.Time) }
+func (t Chron) AsSecond() Second   { return SecondOf(t.Time) }
+func (t Chron) AsMilli() Milli     { return MilliOf(t.Time) }
+func (t Chron) AsMicro() Micro     { return MicroOf(t.Time) }
+func (t Chron) AsChron() Chron { return t }
+func (t Chron) AsTime() time.Time  { return t.Time }
 
-func (t TimeExact) Increment(d dura.Time) TimeExact {
-	return TimeExact{t.AddDate(d.Years(), d.Months(), d.Days()).Add(d.Duration())}
+func (t Chron) Increment(d dura.Time) Chron {
+	return Chron{t.AddDate(d.Years(), d.Months(), d.Days()).Add(d.Duration())}
 }
 
-func (t TimeExact) Decrement(d dura.Time) TimeExact {
-	return TimeExact{t.AddDate(-1*d.Years(), -1*d.Months(), -1*d.Days()).Add(-1 * d.Duration())}
+func (t Chron) Decrement(d dura.Time) Chron {
+	return Chron{t.AddDate(-1*d.Years(), -1*d.Months(), -1*d.Days()).Add(-1 * d.Duration())}
 }
 
 // AddN adds n Nanoseconds to the TimeExact
-func (t TimeExact) AddN(n int) TimeExact {
+func (t Chron) AddN(n int) Chron {
 	return TimeOf(t.AsTime().Add(time.Duration(n)))
 }
 
 // span.Time implementation
-func (t TimeExact) Start() TimeExact {
+func (t Chron) Start() Chron {
 	return t
 }
 
-func (t TimeExact) End() TimeExact {
+func (t Chron) End() Chron {
 	return t
 }
 
-func (t TimeExact) Contains(s Span) bool {
+func (t Chron) Contains(s Span) bool {
 	return !t.Before(s) && !t.After(s)
 }
 
-func (t TimeExact) Before(s Span) bool {
+func (t Chron) Before(s Span) bool {
 	return t.End().AsTime().Before(s.Start().AsTime())
 }
 
-func (t TimeExact) After(s Span) bool {
+func (t Chron) After(s Span) bool {
 	return t.Start().AsTime().After(s.End().AsTime())
 }
 
-func (t TimeExact) Duration() dura.Time {
-	return dura.Micro
+func (t Chron) Duration() dura.Time {
+	return dura.Nano
 }
 
 
 
-func (t TimeExact) AddYears(y int) TimeExact {
+func (t Chron) AddYears(y int) Chron {
 	return t.Increment(dura.Years(y))
 }
 
-func (t TimeExact) AddMonths(m int) TimeExact {
+func (t Chron) AddMonths(m int) Chron {
 	return t.Increment(dura.Months(m))
 }
 
-func (t TimeExact) AddDays(d int) TimeExact {
+func (t Chron) AddDays(d int) Chron {
 	return t.Increment(dura.Days(d))
 }
 
-func (t TimeExact) AddHours(h int) TimeExact {
+func (t Chron) AddHours(h int) Chron {
 	return t.Increment(dura.Hours(h))
 }
 
-func (t TimeExact) AddMinutes(m int) TimeExact {
+func (t Chron) AddMinutes(m int) Chron {
 	return t.Increment(dura.Mins(m))
 }
 
-func (t TimeExact) AddSeconds(s int) TimeExact {
+func (t Chron) AddSeconds(s int) Chron {
 	return t.Increment(dura.Secs(s))
 }
 
-func (t TimeExact) AddMillis(m int) TimeExact {
+func (t Chron) AddMillis(m int) Chron {
 	return t.Increment(dura.Millis(m))
 }
 
-func (t TimeExact) AddMicros(m int) TimeExact {
+func (t Chron) AddMicros(m int) Chron {
 	return t.Increment(dura.Micros(m))
 }
 
-func (t TimeExact) AddNanos(n int) TimeExact {
+func (t Chron) AddNanos(n int) Chron {
 	return t.AddN(n)
 }
 
-func (t *TimeExact) Scan(value interface{}) error {
+func (t *Chron) Scan(value interface{}) error {
 	if value == nil {
-		*t = ZeroValue().AsTimeExact()
+		*t = ZeroValue().AsChron()
 		return nil
 	}
 	if tt, ok := value.(time.Time); ok {
@@ -154,26 +155,26 @@ func (t *TimeExact) Scan(value interface{}) error {
 	return fmt.Errorf("unsupported Scan, storing %s into type *chron.Day", reflect.TypeOf(value))
 }
 
-func (t TimeExact) Value() (driver.Value, error) {
+func (t Chron) Value() (driver.Value, error) {
 	// todo: error check the range.
 	return t.Time, nil
 }
 
 
-func ZeroValue() TimeExact {
+func ZeroValue() Chron {
 	return TimeOf(time.Time{})
 }
 
-func ZeroYear() TimeExact {
-	return NewYear(0).AsTimeExact()
+func ZeroYear() Chron {
+	return NewYear(0).AsChron()
 }
 
-func ZeroUnix() TimeExact {
+func ZeroUnix() Chron {
 	return TimeOf(time.Unix(0, 0))
 }
 
 func ZeroTime() time.Time {
-	return time.Time{}
+	return time.Time{}.UTC()
 }
 
 // see: https://stackoverflow.com/questions/25065055/what-is-the-maximum-time-time-in-go
@@ -182,11 +183,11 @@ var unixToInternal = int64((1969*365 + 1969/4 - 1969/100 + 1969/400) * 24 * 60 *
 var max = time.Unix(1<<63-1-unixToInternal, 999999999).UTC()
 var minimum = time.Unix(-1*int64(^uint(0)>>1)-1+unixToInternal, 0).UTC()
 
-func MaxValue() TimeExact {
+func MaxValue() Chron {
 	return TimeOf(max)
 }
 
-func MinValue() TimeExact {
+func MinValue() Chron {
 	return TimeOf(minimum)
 }
 

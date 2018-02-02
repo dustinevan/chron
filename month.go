@@ -27,23 +27,23 @@ func MonthOf(t time.Time) Month {
 	return NewMonth(t.Year(), t.Month())
 }
 
-func (m Month) AsYear() Year           { return YearOf(m.Time) }
-func (m Month) AsMonth() Month         { return m }
-func (m Month) AsDay() Day             { return DayOf(m.Time) }
-func (m Month) AsHour() Hour           { return HourOf(m.Time) }
-func (m Month) AsMinute() Minute       { return MinuteOf(m.Time) }
-func (m Month) AsSecond() Second       { return SecondOf(m.Time) }
-func (m Month) AsMilli() Milli         { return MilliOf(m.Time) }
-func (m Month) AsMicro() Micro         { return MicroOf(m.Time) }
-func (m Month) AsTimeExact() TimeExact { return TimeOf(m.Time) }
-func (m Month) AsTime() time.Time      { return m.Time }
+func (m Month) AsYear() Year       { return YearOf(m.Time) }
+func (m Month) AsMonth() Month     { return m }
+func (m Month) AsDay() Day         { return DayOf(m.Time) }
+func (m Month) AsHour() Hour       { return HourOf(m.Time) }
+func (m Month) AsMinute() Minute   { return MinuteOf(m.Time) }
+func (m Month) AsSecond() Second   { return SecondOf(m.Time) }
+func (m Month) AsMilli() Milli     { return MilliOf(m.Time) }
+func (m Month) AsMicro() Micro     { return MicroOf(m.Time) }
+func (m Month) AsChron() Chron { return TimeOf(m.Time) }
+func (m Month) AsTime() time.Time  { return m.Time }
 
-func (m Month) Increment(l dura.Time) TimeExact {
-	return TimeExact{m.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
+func (m Month) Increment(l dura.Time) Chron {
+	return Chron{m.AddDate(l.Years(), l.Months(), l.Days()).Add(l.Duration())}
 }
 
-func (m Month) Decrement(l dura.Time) TimeExact {
-	return TimeExact{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
+func (m Month) Decrement(l dura.Time) Chron {
+	return Chron{m.AddDate(-1*l.Years(), -1*l.Months(), -1*l.Days()).Add(-1 * l.Duration())}
 }
 
 func (m Month) AddN(n int) Month {
@@ -51,11 +51,11 @@ func (m Month) AddN(n int) Month {
 }
 
 // span.Time implementation
-func (m Month) Start() TimeExact {
-	return m.AsTimeExact()
+func (m Month) Start() Chron {
+	return m.AsChron()
 }
 
-func (m Month) End() TimeExact {
+func (m Month) End() Chron {
 	return m.AddN(1).Decrement(dura.Nano)
 }
 
@@ -107,8 +107,8 @@ func (m Month) AddMicros(mi int) Micro {
 	return m.AsMicro().AddN(mi)
 }
 
-func (m Month) AddNanos(n int) TimeExact {
-	return m.AsTimeExact().AddN(n)
+func (m Month) AddNanos(n int) Chron {
+	return m.AsChron().AddN(n)
 }
 
 func (m *Month) Scan(value interface{}) error {
