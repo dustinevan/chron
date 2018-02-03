@@ -1,4 +1,5 @@
 ## chron
-#it's time :]
+it's time :]
 
-[logo]: https://github.com/dustinevan/chron/chron.png 
+Inline-style: 
+![](https://github.com/dustinevan/chron/blob/master/chron.png "chron")
