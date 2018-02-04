@@ -43,6 +43,6 @@ previous_second := chron.ThisSecond().AddN(-1) type chron.Second
 ```
 JSON Unmarshaling methods support 25 different formats--more can be added by appending to chron.ParseFormats. Scan and Value methods are also implemented to allow DB support. 
 
-Becuase time.Time is embedded, time package methods can be accessed directly, Before, After, and UnmarshalJSON are overwritten, but will provide the same functionality. Before and After now handle the overlapping nature of timespans, and UnmarshalJSON adds more formats besides time.RFC3339.     
+Becuase time.Time is embedded, time package methods can be accessed directly. Before, After, and UnmarshalJSON are overwritten, but will provide the same functionality. Before and After now handle the overlapping nature of timespans, and UnmarshalJSON adds more formats besides time.RFC3339.     
 
 
