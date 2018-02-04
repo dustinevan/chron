@@ -60,7 +60,7 @@ d = d.Mult(3) // 3 years, 9 months, 45 days, 36 hours
 now := chron.Now() // 2018-02-04 21:09:50.096961028 +0000 UTC
 future := now.Increment(d) //2021-12-21 09:09:50.096961028 +0000 UTC
 ```
-Convenience methods has overcome the original uses for `dura.Unit` constants, there are left here for possible use in switch statements and as the hard coded durations in chron.Span implementations. 
+Convenience methods have overcome the original uses for `dura.Unit` constants, there are left here for possible use in switch statements and as the hard coded durations in chron.Span implementations. 
 ```golang
 today := chron.today()
 // before 
