@@ -64,7 +64,7 @@ Convenience methods has overcome the original need for `dura.Unit` constants, th
 ```golang
 today := chron.today()
 // before 
-noon := now.Increment(dura.Hour.Mult(12)).AsHour()
+noon := today.Increment(dura.Hour.Mult(12)).AsHour()
 // new
 noon := today.AddHours(12)
 ```
