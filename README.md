@@ -46,7 +46,7 @@ JSON Unmarshaling methods support 25 different formats--more can be added by app
 Becuase time.Time is embedded, time package methods can be accessed directly. Before, After, and UnmarshalJSON are overwritten, but will provide the same functionality. Before and After now handle the overlapping nature of timespans, and UnmarshalJSON adds more formats besides time.RFC3339.     
 
 #### Time Zones
-I have been burned by timezoned time data. I am of the opinion that all times belong in UTC until a human being wants to see them. I could be naive/wrong about this opinion. Currently all times in chron are UTC, using the constructors will guarantee UTC internal times. If a chron user wants to create intances via chron.Chron{}, it is their responsibility to ensure the underlying time is in UTC. 
+I have been burned by timezoned time data. I am of the opinion that all times belong in UTC until a human being wants to see them. I could be naive/wrong about this opinion. Currently chron converts all times to UTC, using the constructors will guarantee UTC internal times. If a chron user wants to create intances via chron.Chron{}, it is their responsibility to ensure the underlying time is in UTC. 
 
 #### dura.Time implmentations
 
