@@ -60,7 +60,7 @@ d = d.Mult(3) // 3 years, 9 months, 45 days, 36 hours
 now := chron.Now() // 2018-02-04 21:09:50.096961028 +0000 UTC
 future := now.Increment(d) //2021-12-21 09:09:50.096961028 +0000 UTC
 ```
-Convenience methods has overcome the original need for `dura.Unit` constants, there are left here for possible use in switch statements and the occasional need
+Convenience methods has overcome the original uses for `dura.Unit` constants, there are left here for possible use in switch statements and as the hard coded durations in chron.Span implementations. 
 ```golang
 today := chron.today()
 // before 
@@ -68,4 +68,15 @@ noon := today.Increment(dura.Hour.Mult(12)).AsHour()
 // new
 noon := today.AddHours(12)
 ```
-#### chron.Span
+#### chron.Span implementations
+`chron.Span` is just a time combined with a duration. Each of the `chron.Time` implementations also implement `chron.Span`. This interface allows the compairson of timespans rather than just time instants. 
+```golang
+tomorrow := chron.Today().AddDays(1)
+noon_tomorrow := tomorrow.AddHours(12)
+if tomorrow.Contains(noon_tomorrow) {
+    fmt.Println(:])
+}
+if chron.Today().Before(tomorrow) {
+    fmt.Println(:])
+}
+```
