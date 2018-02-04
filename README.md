@@ -38,6 +38,7 @@ Increment and Decrement are meant to handle any possible fuzzy or exact duration
 ```golang
 next_hour := chron.ThisHour().AddN(1)
 previous_second := chron.ThisSecond().AddN(-1)
+next_hour_on_this_day_in_5_years := chron.ThisHour().AddN(1).AddYears(5)
 ```
 JSON Unmarshaling methods support 25 different formats. Scan and Value methods are implemented to allow DB support. 
 
