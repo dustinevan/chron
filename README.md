@@ -38,11 +38,16 @@ While Increment and Decrement handle any time duration, simple operations are be
 ```golang
 now := chron.Now() // type chron.Chron 
 next_hour := chron.ThisHour().AddN(1) // type chron.Hour
-five_minutes_ago := chron.Now().AddMinutes(-5) type chron.Chron
-previous_second := chron.ThisSecond().AddN(-1) type chron.Second
+five_minutes_ago := chron.Now().AddMinutes(-5) // type chron.Chron
+previous_second := chron.ThisSecond().AddN(-1) // type chron.Second
 ```
 JSON Unmarshaling methods support 25 different formats--more can be added by appending to chron.ParseFormats. Scan and Value methods are also implemented to allow DB support. 
 
 Becuase time.Time is embedded, time package methods can be accessed directly. Before, After, and UnmarshalJSON are overwritten, but will provide the same functionality. Before and After now handle the overlapping nature of timespans, and UnmarshalJSON adds more formats besides time.RFC3339.     
+
+#### Time Zones
+I have been burned by timezoned time data. I am of the opinion that all times belong in UTC until a human being wants to see them. I could be naive/wrong about this opinion. Currently all times in chron are UTC, using the constructors will guarantee UTC internal times. If a chron user wants to create intances via chron.Chron{}, it is their responsibility to ensure the underlying time is in UTC. 
+
+#### dura.Time implmentations
 
 
