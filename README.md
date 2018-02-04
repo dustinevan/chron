@@ -80,3 +80,9 @@ if chron.Today().Before(tomorrow) {
     fmt.Println(:])
 }
 ```
+
+#### Future Plans
+I actually set out to write a scheduler, then I decided I needed a library that could output a stream of times base on input arguments. Then I decided to write some time conveniece stuff to make all the odd time precision and fuzzy duration issues easier to deal with. Chron will eventually become the second thing. I plan to add time series, time sequence and relative time functionality in the near future. What exists now though is solid, all changes to current code will preserve backward compatibility. 
+
+#### Issues
+Please make issues if you have things you want to discuss or that you think need fixing. I'm all ears.  
