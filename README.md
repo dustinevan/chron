@@ -36,8 +36,8 @@ previous_second := chron.Now().Decrement(dura.Second).AsSecond()
 ```
 Increment and Decrement are meant to handle any possible fuzzy or exact duration. So these operations are better done useing the many convenience methods. 
 ```golang
-next_hour := chron.Now().AddHours(1).AsHour()
-previous_second := chron.Now().AddSeconds(-1).AsSecond()
+next_hour := chron.ThisHour().AddHours(1)
+previous_second := chron.ThisSecond().AddSeconds(-1)
 ```
 JSON Unmarshaling methods support 25 different formats. Scan and Value methods are implemented to allow DB support. 
 
