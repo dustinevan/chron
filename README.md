@@ -38,7 +38,7 @@ While `Increment` and `Decrement` handle any time duration, simple operations ar
 ```golang
 now := chron.Now() // type chron.Chron 
 next_hour := chron.ThisHour().AddN(1) // type chron.Hour
-five_minutes_ago := chron.Now().AddMinutes(-5) // type chron.Chron
+five_minutes_ago := now.AddMinutes(-5) // type chron.Chron
 previous_second := chron.ThisSecond().AddN(-1) // type chron.Second
 ```
 JSON Unmarshaling methods support 25 different formats--more can be added by appending to `chron.ParseFormats`. `Scan` and `Value` methods are also implemented to allow DB support. 
