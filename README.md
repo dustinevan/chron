@@ -29,17 +29,20 @@ this_month := now.AsMonth() // type chron.Month 2018-02-01 00:00:00 +0000 UTC
 this_year := now.AsYear()   // type chron.Year 2018-01-01 00:00:00 +0000 UTC
 time_time := now.AsTime()   // type time.Time 2018-02-04 04:25:20.056473271 +0000 UTC
 ```
-Increment and Decrement functions are also required as part of the chron.Time interface. These take in a dura.Time and return a chron.Chron
+Increment and Decrement functions are also required as part of the chron.Time interface. These functions handle any possible fuzzy or exact duration (dura.Time) and return a new chron.Chron
 ```golang
-next_hour := chron.Now().Increment(dura.Hour).AsHour()
-previous_second := chron.Now().Decrement(dura.Second).AsSecond()
+h := chron.Now().Increment(dura.NewDuration(1, 5, 32, time.Hour * 4 + time.Minute * 15 + time.Second * 30)).AsHour()
+// the hour 1 year, 5 months, 32 days, 4 hour, 15 minutes, and 30 seconds from now
 ```
-Increment and Decrement are meant to handle any possible fuzzy or exact duration. So these operations are better done useing the many convenience methods. 
+While Increment and Decrement handle any time duration, simple operations are better done using the many convenience methods. 
 ```golang
-next_hour := chron.ThisHour().AddN(1)
-previous_second := chron.ThisSecond().AddN(-1)
-next_hour_on_this_day_in_5_years := chron.ThisHour().AddN(1).AddYears(5)
+now := chron.Now() // type chron.Chron 
+next_hour := chron.ThisHour().AddN(1) // type chron.Hour
+five_minutes_ago := chron.Now().AddMinutes(-5) type chron.Chron
+previous_second := chron.ThisSecond().AddN(-1) type chron.Second
 ```
-JSON Unmarshaling methods support 25 different formats. Scan and Value methods are implemented to allow DB support. 
+JSON Unmarshaling methods support 25 different formats--more can be added by appending to chron.ParseFormats. Scan and Value methods are also implemented to allow DB support. 
+
+Becuase time.Time is embedded, time package methods can be accessed directly, Before, After, and UnmarshalJSON are overwritten, but will provide the same functionality. Before and After now handle the overlapping nature of timespans, and UnmarshalJSON adds more formats besides time.RFC3339.     
 
 
