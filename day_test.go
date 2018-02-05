@@ -1,12 +1,13 @@
 package chron
 
 import (
+	"database/sql/driver"
 	"testing"
 	"time"
 
 	"github.com/dustinevan/chron/dura"
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
-	"database/sql/driver"
 )
 
 var tday = time.Date(2018, time.February, 1, 0, 0, 0, 0, time.UTC)
@@ -62,7 +63,7 @@ func TestDay_Start(t *testing.T) {
 }
 
 func TestDay_End(t *testing.T) {
-	assert.Exactly(t, day.Time.Add((time.Hour * 24) - time.Nanosecond), day.End().Time)
+	assert.Exactly(t, day.Time.Add((time.Hour*24)-time.Nanosecond), day.End().Time)
 }
 
 func TestDay_Contains(t *testing.T) {
@@ -102,11 +103,52 @@ func TestDay_Value(t *testing.T) {
 }
 
 func TestDay_UnmarshalJSON(t *testing.T) {
-	var d Day
-	assert.Nil(t, d.UnmarshalJSON([]byte("null")))
-	assert.Exactly(t, ZeroValue().AsDay(), d)
-	assert.Error(t, d.UnmarshalJSON([]byte("as;dlkjfd")))
-	assert.Exactly(t, ZeroValue().AsDay(), d)
-	assert.Nil(t, d.UnmarshalJSON([]byte("\"2018-02-01T00:00:00Z\"")))
-	assert.Exactly(t, day, d)
+	cases := []struct {
+		msg       string // description of test
+		data      string // input data
+		expected  Day    // expected result
+		shouldErr bool   // should we get an error?
+	}{
+		{
+			msg:  "null json",
+			data: "null",
+		},
+		{
+			msg:       "invalid data",
+			data:      "as;dlkjfd",
+			shouldErr: true,
+		},
+		{
+			msg:      "RFC3339 with quotes",
+			data:     "\"2018-02-01T00:00:00Z\"",
+			expected: NewDay(2018, 02, 01),
+		},
+		{
+			msg:      "day format (2006-01-02)",
+			data:     "2018-02-01",
+			expected: NewDay(2018, 02, 01),
+		},
+		{
+			msg:      "day format (02-Jan-06)",
+			data:     "01-Feb-18",
+			expected: NewDay(2018, 02, 01),
+		},
+		{
+			msg:      "day format (01/02/2006)",
+			data:     "02/01/2018",
+			expected: NewDay(2018, 02, 01),
+		},
+	}
+
+	for _, test := range cases {
+		var d Day
+		if err := d.UnmarshalJSON([]byte(test.data)); test.shouldErr != (err != nil) {
+			t.Errorf("FAIL: %q unexpected error %s", test.msg, err)
+		} else if !cmp.Equal(test.expected, d) {
+			t.Errorf("FAIL: %q %s", test.msg, cmp.Diff(d, test.expected))
+		} else { // logs only show up if the verbose flag is set
+			t.Logf("PASS: %q", test.msg)
+		}
+
+	}
 }
