@@ -7,12 +7,13 @@ import (
 )
 
 const (
+	TimeDotTimeString = "2006-01-02 15:04:05.999999999 +0000 UTC"
 	DashDDMMMYY       = "02-Jan-06"
 	DashDDMMMYYYY     = "02-Jan-2006"
 	DashMMDDYY        = "01-02-06"
 	DashMMDDYYYY      = "01-02-2006"
 	SlashMMDDYY       = "01/02/06"
-	SlashMMDDYYYY      = "01/02/2006"
+	SlashMMDDYYYY     = "01/02/2006"
 	ShortDateTime     = SlashMMDDYYYY + " 15:04 PM"
 	ShortSecond       = SlashMMDDYYYY + " 15:04:05 PM"
 	ShortDateTime24   = SlashMMDDYYYY + " 15:04"
@@ -28,6 +29,7 @@ const (
 var ParseFormats = []string{
 	time.RFC3339,
 	time.RFC3339Nano,
+	TimeDotTimeString,
 	time.RFC822,
 	time.RFC822Z,
 	time.UnixDate,
