@@ -2,8 +2,9 @@ package chron
 
 import (
 	"testing"
-	"github.com/stretchr/testify/assert"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseUnixSeconds(t *testing.T) {
@@ -98,4 +99,8 @@ func TestParseWithFormats(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Exactly(t, year.AsTime(), tt)
 	assert.Exactly(t, year, YearOf(tt))
+
+	tt, err = ParseWithFormats("2018-03-26 05:10:53.411453356 +0000 UTC")
+	assert.Nil(t, err)
+	assert.Exactly(t, NewTime(2018, time.March, 26, 5, 10, 53, 411453356), TimeOf(tt))
 }
