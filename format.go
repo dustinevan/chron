@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	TimeDotTimeString = "2006-01-02 15:04:05.999999999 +0000 UTC"
+	DashYYYYMMDD       = "2006-01-02"
 	DashDDMMMYY       = "02-Jan-06"
 	DashDDMMMYYYY     = "02-Jan-2006"
 	DashMMDDYY        = "01-02-06"
@@ -24,11 +24,13 @@ const (
 	DashNumMonthShort = "01-06"
 	CCMonth           = "01/06"
 	YearFmt           = "2006"
+	TimeDotTimeString = "2006-01-02 15:04:05.999999999 +0000 UTC"
 )
 
 var ParseFormats = []string{
 	time.RFC3339,
 	time.RFC3339Nano,
+	DashYYYYMMDD,
 	TimeDotTimeString,
 	time.RFC822,
 	time.RFC822Z,
