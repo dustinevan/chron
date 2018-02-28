@@ -25,6 +25,7 @@ const (
 	CCMonth           = "01/06"
 	YearFmt           = "2006"
 	TimeDotTimeString = "2006-01-02 15:04:05.999999999 +0000 UTC"
+	FileStamp		  = "20060102T150405"
 )
 
 var ParseFormats = []string{
@@ -56,6 +57,7 @@ var ParseFormats = []string{
 	DashNumMonthShort,
 	CCMonth,
 	YearFmt,
+	FileStamp,
 }
 
 var ParseFunctions = []func(string) (time.Time, error){

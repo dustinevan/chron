@@ -108,4 +108,9 @@ func TestParseWithFormats(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Exactly(t, NewDay(2018, time.February, 28).AsTime(), tt)
 	assert.Exactly(t, NewDay(2018, time.February, 28), DayOf(tt))
+
+	tt, err = ParseWithFormats("20180228T150219")
+	assert.Nil(t, err)
+	assert.Exactly(t, NewSecond(2018, time.February, 28, 15, 02, 19).AsTime(), tt)
+	assert.Exactly(t, NewSecond(2018, time.February, 28, 15, 02, 19), SecondOf(tt))
 }
