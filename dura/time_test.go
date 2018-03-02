@@ -50,11 +50,11 @@ func TestNanos(t *testing.T) {
 }
 
 func TestDuration_Mult(t *testing.T) {
-	assert.Exactly(t, NewDuration(3, 9, 24, time.Second * 15120), tdur.Mult(3))
+	assert.Exactly(t, NewDuration(3, 9, 24, time.Second*15120), tdur.Mult(3))
 }
 
 func TestSum(t *testing.T) {
-	assert.Exactly(t, NewDuration(3, 9, 24, time.Second * 15120), Sum(tdur, tdur, tdur))
+	assert.Exactly(t, NewDuration(3, 9, 24, time.Second*15120), Sum(tdur, tdur, tdur))
 }
 
 func TestDuration_Years(t *testing.T) {
@@ -70,7 +70,7 @@ func TestDuration_Days(t *testing.T) {
 }
 
 func TestDuration_Duration(t *testing.T) {
-	assert.Exactly(t, time.Second * 5040, tdur.Duration())
+	assert.Exactly(t, time.Second*5040, tdur.Duration())
 }
 
 func TestDuration_String(t *testing.T) {
