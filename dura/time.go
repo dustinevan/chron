@@ -15,12 +15,12 @@ type Time interface {
 type Duration struct {
 	Yrs  int
 	Mons int
-	Dys   int
-	Dur   time.Duration
+	Dys  int
+	Dur  time.Duration
 }
 
 func NewDuration(year, month, day int, dur time.Duration) Duration {
-	return Duration{ year, month, day, dur	}
+	return Duration{year, month, day, dur}
 }
 
 func Years(y int) Duration {
@@ -63,8 +63,8 @@ func (d Duration) Mult(n int) Duration {
 	return Duration{
 		Yrs:  d.Yrs * n,
 		Mons: d.Mons * n,
-		Dys:   d.Dys * n,
-		Dur:   time.Duration(int(d.Dur) * n),
+		Dys:  d.Dys * n,
+		Dur:  time.Duration(int(d.Dur) * n),
 	}
 }
 
