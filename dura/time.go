@@ -68,6 +68,7 @@ func (d Duration) Mult(n int) Duration {
 	}
 }
 
+// TODO: this will not work across time.duration overruns (290 years)
 func Sum(durs ...Duration) Duration {
 	d := Duration{}
 	for _, dur := range durs {
