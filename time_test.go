@@ -7,6 +7,7 @@ import (
 
 	"github.com/dustinevan/chron/dura"
 	"github.com/stretchr/testify/assert"
+	"fmt"
 )
 
 var tnano = time.Date(2018, time.June, 5, 12, 10, 6, 55, time.UTC)
@@ -31,7 +32,7 @@ func TestChron_Transfers(t *testing.T) {
 }
 
 func TestChron_Increment(t *testing.T) {
-	y := chr.Increment(dura.NewDuration(1, 2, 30, time.Nanosecond * 500))
+	y := chr.Increment(dura.NewDuration(1, 2, 30, time.Nanosecond*500))
 	td := tnano.AddDate(1, 2, 30).Add(time.Nanosecond * 500)
 	assert.Exactly(t, td, y.Time)
 }
@@ -41,7 +42,7 @@ func TestChron_AsTime(t *testing.T) {
 }
 
 func TestChron_Decrement(t *testing.T) {
-	d := chr.Decrement(dura.NewDuration(1, 2, 30, time.Nanosecond * 500))
+	d := chr.Decrement(dura.NewDuration(1, 2, 30, time.Nanosecond*500))
 	td := tnano.AddDate(-1, -2, -30).Add(time.Nanosecond * -500)
 	assert.Exactly(t, td, d.Time)
 
@@ -117,4 +118,21 @@ func TestZeroYear(t *testing.T) {
 
 func TestZeroUnix(t *testing.T) {
 	assert.Exactly(t, TimeOf(time.Unix(0, 0)), ZeroUnix())
+}
+
+func TestDiff(t *testing.T) {
+	s := NewTime(2013, time.July, 31, 8, 34, 20, 900000000)
+	e := NewTime(2017, time.March, 23, 4, 2, 18, 100000000)
+	d := Diff(s, e)
+	assert.Exactly(t, dura.NewDuration(3, 7, 19,
+		time.Duration(int(time.Hour*19)+int(time.Minute*27)+int(time.Second*57)+int(time.Nanosecond*200000000))), d)
+	assert.Exactly(t, s.Increment(d), e)
+	// backwards
+	backwards := Diff(e, s)
+	assert.Exactly(t, dura.Duration{}, dura.Sum(d, backwards))
+
+	fmt.Println(d, backwards)
+	fmt.Println(e.Increment(backwards))
+	fmt.Println(dura.Sum(d, backwards))
+	fmt.Println(s.Increment(dura.Sum(d, backwards)))
 }
