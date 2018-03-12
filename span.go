@@ -90,23 +90,3 @@ func Diff(start, end Time) dura.Duration {
 
 	return dura.Duration{Yrs: yrs, Dur: dur}
 }
-
-func LeapDays(start, end Time) int {
-	//TODO: i'm already looping, just count the days.
-
-	if start.AsTime().After(end.AsTime()){
-		return LeapDays(end, start)
-	}
-	s := start.AsChron()
-	e := end.AsChron()
-	yearsToCheck := make([]int, 0)
-	if s.Before(s.AddMonths(2).AddDays(28)) {
-		yearsToCheck = append(yearsToCheck, s.Year())
-	}
-	curr := s.AsYear().AddN(1)
-	for curr.Year() < e.Year() {
-		yearsToCheck = append(yearsToCheck, curr.Year())
-		curr = curr.AddYears(1)
-	}
-
-}
