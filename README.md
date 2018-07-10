@@ -62,7 +62,7 @@ future := now.Increment(d) //2021-12-21 09:09:50.096961028 +0000 UTC
 ```
 Convenience methods have overcome the original uses for `dura.Unit` constants, there are left here for possible use in switch statements and as the hard coded durations in chron.Span implementations. 
 ```golang
-today := chron.today()
+today := chron.Today()
 // before 
 noon := today.Increment(dura.Hour.Mult(12)).AsHour()
 // new
@@ -82,7 +82,7 @@ if chron.Today().Before(tomorrow) {
 ```
 
 #### Future Plans
-I actually set out to write a scheduler, then I decided I needed a library that could output a stream of times base on input arguments. Then I decided to write some time conveniece stuff to make all the odd time precision and fuzzy duration issues easier to deal with. Chron will eventually become the second thing. I plan to add time series, time sequence and relative time functionality in the near future. What exists now though is solid, all changes to current code will preserve backward compatibility. 
+I actually set out to write a scheduler, then I decided I needed a library that could output a stream of times based on input arguments. Then I decided to write some time conveniece stuff to make all the odd time precision and fuzzy duration issues easier to deal with. Chron will eventually become the second thing. I plan to add time series, time sequence and relative time functionality in the near future. What exists now though is solid, all changes to current code will preserve backward compatibility. 
 
 #### Issues
 Please make issues if you have things you want to discuss or that you think need fixing. I'm all ears.  
