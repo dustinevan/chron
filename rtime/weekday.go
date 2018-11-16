@@ -1,31 +1,24 @@
 package rtime
 
 import (
+	"bufio"
 	"github.com/dustinevan/chron"
 	"github.com/dustinevan/chron/dura"
+	"time"
 )
 
-//// chron.Relative represents a time or span that isn't definite until it is given
-//// a time to relate to. e.g. Wednesdays, three hours ago, or a random second with the hour
-//type Relative interface {
-//	Next(chron.Time) (chron.Span, error)
-//	Previous(chron.Time) (chron.Span, error)
-//}
+type Weekday struct {
+	current chron.Time
+	day time.Weekday
+}
 
-type Weekday int
+func WeekdayOf(t chron.Time, w time.Weekday) Weekday {
+	return Weekday{current:t, day:w}
+}
 
-const (
-	Sunday Weekday = iota
-	Monday
-	Tuesday
-	Wednesday
-	Thursday
-	Friday
-	Saturday
-)
 
-func (w Weekday) Next(t chron.Time) chron.Day {
-	return t.Increment(dura.Days(w.DaysUntil(t))).AsDay()
+func (w Weekday) Next() chron.Day {
+	return .Increment(dura.Days(w.DaysUntil(t))).AsDay()
 }
 
 func (w Weekday) Prev(t chron.Time) chron.Day {
@@ -56,4 +49,5 @@ func (w Weekday) DaysSince(t chron.Time) int {
 		return -wd
 	}
 	return 7 - wd
+	bufio.NewScanner()
 }
