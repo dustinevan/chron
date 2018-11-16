@@ -11,7 +11,7 @@ const (
 	Human
 )
 
-var DefaultIterationStrategy = Standard
+var DefaultIterationStrategy = Human
 
 type Month int
 
