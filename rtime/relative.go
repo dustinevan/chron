@@ -6,7 +6,7 @@ import (
 	"github.com/dustinevan/chron"
 )
 
-type Relative func(chron.TimeExact) (chron.TimeExact, bool)
+type Relative func(chron.Time) (chron.Time, bool)
 
 func Months(m ...time.Month) Relative {
 	return func(exact chron.TimeExact) (chron.TimeExact, bool) {
