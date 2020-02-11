@@ -9,9 +9,9 @@ import (
 )
 
 func TestMonthSeriesProducesASeriesOfMonths(t *testing.T) {
-	second := func(year chron.Year) chron.Month {
-		return chron.NewMonth(year.Year(), time.July)
-	}
+	//second := func(year chron.Year) chron.Month {
+	//	return chron.NewMonth(year.Year(), time.July)
+	//}
 
 	months := NewSeries(everyJuly, thisYear, func(t chron.Time) bool {
 		return t.AsMonth().Year() >= 2100
