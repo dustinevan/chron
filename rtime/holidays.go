@@ -3,7 +3,7 @@ package rtime
 import (
 	"time"
 
-	"github.com/dustinevan/time/chron"
+	"github.com/dustinevan/chron"
 )
 
 type Holiday int
@@ -111,4 +111,19 @@ func (h Holiday) Date(year chron.Year) chron.Day {
 // When a holiday falls on a weekend, the business day observance is moved to a weekday
 func (h Holiday) Observance(year chron.Year) chron.Day {
 	return holidayObservances[int(h)](year)
+}
+
+// Example: The M-F date of the US observance of Christmas Day when Christmas falls on a weekend.
+func ClosestNonWeekend(d chron.Day) chron.Day {
+	if d.Weekday() == time.Saturday {
+		return d.AddN(-1)
+	}
+	if d.Weekday() == time.Sunday {
+		return d.AddN(1)
+	}
+	return d
+}
+
+func IsUSBusinessHoliday(t time.Time) bool {
+
 }

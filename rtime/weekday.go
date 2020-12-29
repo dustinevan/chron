@@ -16,9 +16,8 @@ func WeekdayOf(t chron.Time, w time.Weekday) Weekday {
 	return Weekday{current:t, day:w}
 }
 
-
 func (w Weekday) Next() chron.Day {
-	return .Increment(dura.Days(w.DaysUntil(t))).AsDay()
+	return w.current.Increment(dura.Days(w.DaysUntil(t))).AsDay()
 }
 
 func (w Weekday) Prev(t chron.Time) chron.Day {
