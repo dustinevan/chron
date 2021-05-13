@@ -125,5 +125,10 @@ func ClosestNonWeekend(d chron.Day) chron.Day {
 }
 
 func IsUSBusinessHoliday(t time.Time) bool {
-
+	for _, monthDay := range holidayObservances {
+		if chron.DayOf(t) == monthDay(chron.YearOf(t)) {
+			return true
+		}
+	}
+	return false
 }

@@ -3,7 +3,7 @@ package rtime
 import (
 	"time"
 
-	"github.com/dustinevan/time/chron"
+	"github.com/dustinevan/chron"
 )
 
 type NthWeekDay struct {

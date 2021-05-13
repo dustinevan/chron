@@ -18,7 +18,7 @@ type RTime interface {
 // that represents Tuesdays would return a chron.Span of each chron.Day where
 // the weekday is Tuesday.
 type Iterator interface {
-	// Returns the nth occurrence of the span without advancing
+	// Returns the nth occurrence and advances the internal time (if n is negative it moves in reverse)
 	Nth(n int) chron.Span
 
 	// Returns the next occurrence and advances the internal time
@@ -33,39 +33,3 @@ type Iterator interface {
 	// Returns the span between the current and the nth occurrence
 	Until(n int) chron.Span
 }
-
-//Oldstuff
-//
-//type RMonth func(y chron.Year) chron.Month
-//type RDate func(y chron.Year) chron.Day
-//type RDay func(m chron.Month) chron.Day
-//type RHour func(d chron.Day) chron.Hour
-//type RMinute func(h chron.Hour) chron.Minute
-//type RSecond func(m chron.Minute) chron.Second
-//type RMilli func(s chron.Second) chron.Milli
-//type RMicro func(m chron.Milli) chron.Micro
-//type RTime func(t chron.Time) chron.Chron
-//
-//type TimeFilter func(t chron.Time) bool
-//
-//type Series struct {
-//	timeFunc RTime
-//	start chron.Time
-//	stop TimeFilter
-//}
-//
-//func NewSeries(timeFunc RTime, start chron.Time, stop TimeFilter) Series {
-//	return Series{timeFunc:timeFunc, start: start, stop: stop}
-//}
-//
-//func (s *Series) NextN(n int) []chron.Chron {
-//	result := make([]chron.Chron, n)
-//	for i := 0; i < n; i++ {
-//		s.start = s.timeFunc(s.start)
-//		if s.stop(s.start) {
-//			return result
-//		}
-//		result[i] = s.start.AsChron()
-//	}
-//	return result
-//}

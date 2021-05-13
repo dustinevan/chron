@@ -37,9 +37,9 @@ func NewInterval(start Chron, d dura.Time) *Interval {
 	}
 }
 
-func TimeRange(start, end Chron) *Interval {
-
-}
+// func TimeRange(start, end Chron) *Interval {
+//
+// }
 
 func (s Interval) Contains(t Span) bool {
 	return !s.Before(t) && !s.After(t)

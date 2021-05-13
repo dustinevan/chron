@@ -3,7 +3,7 @@ package rtime
 import (
 	"time"
 
-	"github.com/dustinevan/time/chron"
+	"github.com/dustinevan/chron"
 )
 
 // 0 is the last day of the month, 1 = 2nd to last day etc. rollover is possible
