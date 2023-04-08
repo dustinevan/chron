@@ -3,7 +3,7 @@ it's time :]
 
 ![](https://github.com/dustinevan/chron/blob/master/chron.png "chron")
 
-Chron is a general purpose time library that embeds `time.Time` and can be used as a replacement. Chron uses `time.Time` for calculations, so you can trust it's accuracy.
+Chron is a general purpose time library that embeds `time.Time` and can be used as a replacement. Chron uses `time.Time` for calculations, so you can trust its accuracy.
 
 Why? There are many reasons, but the central one is that `time.Time` is often used as an interface. Holidays, credit card expiration dates, hourly reporting times, postgres timestamps; all these things have different time precisions, some are used as instants, while others are used as time spans. 
 
